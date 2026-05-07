@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    /* ── Hero ────────────────────────────────────────────────── */
+    .hero-home {
+      position: relative;
+      height: 78vh;
+      min-height: 520px;
+      max-height: 720px;
+      overflow: hidden;
+      border-radius: 0;
+      margin-top: -64px;
+      padding-top: 64px;
+      body:has(.trial-banner) & {
+        margin-top: -104px;
+        padding-top: 104px;
+      }
+    }
+    .hero-home .bg { position: absolute; inset: 0; }
+    .hero-home .bg img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover;
+      opacity: 0; transition: opacity 1.4s ease;
+    }
+    .hero-home .bg img.active { opacity: 1; animation: kenBurnsHome 16s ease-out forwards; }
+    @keyframes kenBurnsHome {
+      from { transform: scale(1.04); }
+      to   { transform: scale(1.14); }
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to top, rgba(14,26,26,0.78) 0%, rgba(14,26,26,0.3) 45%, rgba(14,26,26,0.1) 100%),
+        linear-gradient(90deg, rgba(14,26,26,0.45) 0%, rgba(14,26,26,0.05) 60%);
+    }
+    .hero-content {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 4rem 1.5rem 3.5rem;
+      color: #fff;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      left: 0; right: 0;
+    }
+    @media (min-width: 768px) { .hero-content { padding: 4rem 3rem 4rem; } }
+
+    .hero-pills {
+      display: flex; align-items: center; gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .hero-pills .dots { display: flex; gap: 6px; }
+    .hero-pills .dot {
+      width: 8px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,0.35);
+      transition: width 0.4s, background 0.4s;
+      cursor: pointer; border: 0;
+    }
+    .hero-pills .dot.active { width: 32px; background: #fff; }
+    .hero-pills .label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .hero-title-h {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.0;
+      margin-bottom: 0.65rem;
+      color: var(--teal);
+      text-shadow: 0 2px 24px rgba(0,0,0,0.25);
+    }
+    .hero-title-h em {
+      font-style: normal;
+      color: #cae9e9;
+      font-weight: 600;
+    }
+
+    .hero-sub {
+      color: rgba(255,255,255,0.7);
+      font-size: 1rem;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 2rem;
+      max-width: 28rem;
+      line-height: 1.5;
+    }
+
+    .hero-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .hero-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.4rem;
+      border-radius: 9999px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .hero-btn.solid {
+      background: #fff;
+      color: var(--text-1);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.2);
+    }
+    .hero-btn.solid:hover {
+      transform: translateY(-2px);
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(110,173,173,0.4);
+    }
+    .hero-btn.glass {
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: #fff;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .hero-btn.glass:hover {
+      background: rgba(255,255,255,0.24);
+      border-color: rgba(255,255,255,0.45);
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      position: absolute;
+      bottom: 4rem;
+      right: 1.5rem;
+      display: flex; gap: 0.65rem;
+    }
+    @media (min-width: 768px) { .hero-stats { right: 3rem; } }
+    @media (max-width: 640px) { .hero-stats { display: none; } }
+    .hero-stat {
+      text-align: center;
+      padding: 0.85rem 1.1rem;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.18);
+      min-width: 78px;
+    }
+    .hero-stat .v {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+    .hero-stat .l {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-top: 4px;
+    }
+
+    /* ── Feature cards ───────────────────────────────────────── */
+    .feature-card {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      background: var(--card);
+      padding: 1.65rem;
+      transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s, border-color 0.25s;
+      min-height: 220px;
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: var(--text-1);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--teal-50);
+    }
+    .feature-card .ico {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: var(--teal-50);
+      color: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+    .feature-card .ico svg {
+      width: 22px; height: 22px;
+    }
+    .feature-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-1);
+      margin-bottom: 0.4rem;
+    }
+    .feature-card .desc {
+      color: var(--text-2);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .feature-card .more {
+      margin-top: auto; padding-top: 1.25rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      color: var(--teal-700);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: gap 0.25s;
+    }
+    .feature-card:hover .more { gap: 0.7rem; }
+
+    /* ── Destination strip ───────────────────────────────────── */
+    .dest-strip {
+      display: flex; gap: 1.25rem;
+      overflow-x: auto;
+      padding-bottom: 0.85rem;
+      scrollbar-width: thin;
+      scroll-snap-type: x mandatory;
+    }
+    .dest-strip::-webkit-scrollbar { height: 6px; }
+    .dest-strip::-webkit-scrollbar-track { background: transparent; }
+    .dest-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
+
+    .dest-card {
+      flex-shrink: 0;
+      width: 220px; height: 280px;
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--muted);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s;
+      scroll-snap-align: start;
+      text-decoration: none;
+    }
+    .dest-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .dest-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s cubic-bezier(.2,.8,.2,1);
+    }
+    .dest-card:hover img { transform: scale(1.08); }
+    .dest-card .grad {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(14,26,26,0.78) 0%, rgba(14,26,26,0.18) 50%, transparent 75%);
+    }
+    .dest-card .meta {
+      position: absolute;
+      bottom: 1.1rem; left: 1.15rem; right: 1.15rem;
+      color: #fff;
+    }
+    .dest-card .meta .name {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .dest-card .meta .country {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.72);
+      margin-top: 4px;
+    }
+    .dest-card .temp {
+      position: absolute;
+      top: 0.85rem; right: 0.85rem;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      color: var(--text-1);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-xs);
+    }
+
+    /* ── AI CTA ──────────────────────────────────────────────── */
+    .ai-cta {
+      position: relative;
+      min-height: 240px;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      padding: 2rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.35s cubic-bezier(.2,.8,.2,1), box-shadow 0.35s;
+    }
+    .ai-cta:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .ai-cta img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s cubic-bezier(.2,.8,.2,1);
+    }
+    .ai-cta:hover img { transform: scale(1.06); }
+    .ai-cta .grad {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(14,26,26,0.85) 0%, rgba(14,26,26,0.4) 60%, rgba(14,26,26,0.05) 100%);
+    }
+    .ai-cta .body { position: relative; z-index: 1; color: #fff; }
+    .ai-cta h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: #fff;
+      margin: 0.55rem 0;
+    }
+    .ai-cta .ic-pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.22);
+      backdrop-filter: blur(12px);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.95);
+    }
+    .ai-cta .open-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.7rem 1.25rem;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-top: 1.25rem;
+      transition: background 0.2s, gap 0.25s;
+    }
+    .ai-cta:hover .open-btn { gap: 0.7rem; background: rgba(255,255,255,0.28); }
+
+    /* ── Booking row ─────────────────────────────────────────── */
+    .booking-row {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.85rem;
+      border-radius: 14px;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: var(--text-1);
+    }
+    .booking-row:hover { background: var(--hover-bg); }
+    .booking-row .b-ico {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      background: var(--teal-50);
+      color: var(--teal);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .booking-row .b-info { flex: 1; min-width: 0; }
+    .booking-row .b-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-1);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .booking-row .b-date {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .section-eyebrow {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .section-eyebrow > div .page-eyebrow { margin-bottom: 0.35rem; }
+    .section-eyebrow > div .page-title {
+      font-size: clamp(1.5rem, 2.5vw, 1.85rem);
+    }
+    .section-eyebrow .more-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-2);
+      transition: color 0.25s, gap 0.25s;
+    }
+    .section-eyebrow .more-link:hover { color: var(--teal-700); gap: 0.7rem; }
+
+    @media (max-width: 900px) {
+      .grid-bookings { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+
+  <main class="app-main" id="page" style="opacity:0;transition:opacity .3s">
+    <section class="hero-home">
+      <div class="bg" id="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-pills">
+          <div class="dots" id="hero-dots"></div>
+          <span class="label" id="hero-label">—</span>
+        </div>
+        <h1 class="hero-title-h">Hello, <em id="hero-name">Explorer</em></h1>
+        <p class="hero-sub">Where are you wandering today?</p>
+        <div class="hero-actions">
+          <a href="/explore" class="hero-btn solid">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Explore Globe
+          </a>
+          <a href="/places" class="hero-btn glass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Browse Places
+          </a>
+          <a href="/planner" class="hero-btn glass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 2l1.9 5.8L20 9.7l-4.6 4 1.5 6.3-4.9-3-4.9 3 1.5-6.3-4.6-4 6.1-1.9z"/></svg>
+            AI Plan
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="v" id="stat-trips">0</div><div class="l">Trips</div></div>
+          <div class="hero-stat"><div class="v" id="stat-bookings">0</div><div class="l">Bookings</div></div>
+          <div class="hero-stat"><div class="v" id="stat-points">0</div><div class="l">Points</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-wrap">
+      <section style="margin-bottom:3.5rem">
+        <p class="page-eyebrow">Your Tools</p>
+        <h2 class="page-title" style="font-size:clamp(1.5rem, 2.5vw, 1.85rem); margin-bottom: 1.5rem;">Everything you need</h2>
+        <div class="grid grid-4">
+          <a href="/explore" class="feature-card">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+            <h3>Explore</h3>
+            <p class="desc">Discover destinations across the globe in an interactive view</p>
+            <span class="more">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
+          <a href="/places" class="feature-card">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <h3>Places</h3>
+            <p class="desc">Search, browse and book places worldwide with confidence</p>
+            <span class="more">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
+          <a href="/planner" class="feature-card">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.9 5.8L20 9.7l-4.6 4 1.5 6.3-4.9-3-4.9 3 1.5-6.3-4.6-4 6.1-1.9z"/></svg></div>
+            <h3>AI Planner</h3>
+            <p class="desc">Real-place itineraries, generated for you in seconds</p>
+            <span class="more">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
+          <a href="/weather" class="feature-card">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 100-9 5.5 5.5 0 00-10.7 1.5A4 4 0 008 19h9.5z"/><path d="M12 2v3M5.5 5.5l2 2M2 12h3"/></svg></div>
+            <h3>Weather</h3>
+            <p class="desc">Live conditions, outfit hints &amp; activity suggestions</p>
+            <span class="more">Open
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <section style="margin-bottom:3.5rem">
+        <div class="section-eyebrow">
+          <div>
+            <p class="page-eyebrow">Trending</p>
+            <h2 class="page-title">Featured Destinations</h2>
+          </div>
+          <a href="/explore" class="more-link">View all
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="dest-strip" id="dest-strip"></div>
+      </section>
+
+      <section style="margin-bottom:3.5rem" id="recs-section" class="hidden">
+        <div class="section-eyebrow">
+          <div>
+            <p class="page-eyebrow">For you</p>
+            <h2 class="page-title">Recommended for you</h2>
+          </div>
+          <a href="/favorites" class="more-link">All
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="dest-strip" id="recs-strip"></div>
+      </section>
+
+      <section style="margin-bottom:2rem">
+        <div class="grid grid-bookings" style="grid-template-columns: 1fr 1.85fr; gap: 1.5rem;">
+          <div class="card">
+            <div class="row-between mb-4">
+              <h3 style="font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:600;color:var(--text-1)">Recent bookings</h3>
+              <a href="/bookings" class="more-link" style="font-size:.8rem">All
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+            <div id="bookings-list">
+              <div class="empty" style="padding: 1.5rem 0.5rem;">
+                <div class="empty-icon" style="width:56px;height:56px;border-radius:14px;margin-bottom:0.85rem;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <p class="text-sm" style="color:var(--text-2)">No bookings yet</p>
+                <a href="/places" class="more-link" style="margin-top:.55rem; display:inline-flex; font-size:.8rem">Browse places
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <a href="/planner" class="ai-cta">
+            <img id="ai-cta-img" alt="Planner">
+            <div class="grad"></div>
+            <div class="body">
+              <h3>Plan your next adventure</h3>
+              <p style="color:rgba(255,255,255,.78);font-size:.9rem;line-height:1.5;max-width:380px">Real-place itineraries crafted in seconds — tailored to where you go and how you travel.</p>
+              <span class="open-btn">Open Planner
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    // Featured destinations — real cities. Photos are loaded from /api/photo.
+    const DESTS = [
+      { name: 'Santorini', country: 'Greece',         q: 'Santorini Oia sunset' },
+      { name: 'Kyoto',     country: 'Japan',          q: 'Kyoto Fushimi Inari' },
+      { name: 'Bali',      country: 'Indonesia',      q: 'Bali Ubud rice terrace' },
+      { name: 'Patagonia', country: 'Argentina',      q: 'Patagonia mountains' },
+      { name: 'Marrakech', country: 'Morocco',        q: 'Marrakech medina' },
+      { name: 'Paris',     country: 'France',         q: 'Paris Eiffel Tower' },
+      { name: 'New York',  country: 'USA',            q: 'New York skyline' },
+      { name: 'Dubai',     country: 'UAE',            q: 'Dubai Burj Khalifa' },
+    ];
+
+    document.addEventListener('app:ready', async (e) => {
+      const user = e.detail.user;
+      document.getElementById('page').style.opacity = '1';
+
+      document.getElementById('hero-name').textContent = (user.full_name || 'Explorer').split(' ')[0];
+      document.getElementById('stat-points').textContent = (user.points || 0).toLocaleString('en-US');
+
+      // Hero rotator
+      const bgEl    = document.getElementById('hero-bg');
+      const dotsEl  = document.getElementById('hero-dots');
+      const labelEl = document.getElementById('hero-label');
+      DESTS.forEach((d, i) => {
+        const im = document.createElement('img');
+        im.alt = d.name;
+        if (i === 0) im.classList.add('active');
+        bgEl.appendChild(im);
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => setActive(i);
+        dotsEl.appendChild(dot);
+      });
+
+      // Lazily fill in real photos
+      DESTS.forEach((d, i) => {
+        db.integrations.photo(d.q).then(r => {
+          const im = bgEl.querySelectorAll('img')[i];
+          if (im && r) im.src = r.url || r.thumb;
+        }).catch(() => {});
+      });
+
+      let active = 0;
+      function setActive(i) {
+        active = i;
+        bgEl.querySelectorAll('img').forEach((im, k) => im.classList.toggle('active', k === i));
+        dotsEl.querySelectorAll('.dot').forEach((d, k) => d.classList.toggle('active', k === i));
+        labelEl.textContent = DESTS[i].name + ', ' + DESTS[i].country;
+      }
+      setActive(0);
+      setInterval(() => setActive((active + 1) % DESTS.length), 4500);
+
+      // Destinations strip
+      const strip = document.getElementById('dest-strip');
+      strip.innerHTML = DESTS.map((d, i) =>
+        '<a href="/places?q=' + encodeURIComponent(d.name) + '" class="dest-card" data-strip-i="' + i + '">' +
+          '<img alt="' + d.name + '">' +
+          '<div class="grad"></div>' +
+          '<span class="temp">' + d.country + '</span>' +
+          '<div class="meta"><div class="name">' + d.name + '</div><div class="country">' + d.country + '</div></div>' +
+        '</a>'
+      ).join('');
+      DESTS.forEach((d, i) => {
+        db.integrations.photo(d.q).then(r => {
+          const card = strip.querySelector('[data-strip-i="' + i + '"] img');
+          if (card && r) card.src = r.thumb || r.url;
+        }).catch(() => {});
+      });
+
+      // AI CTA hero photo
+      db.integrations.photo('travel planning map adventure').then(r => {
+        const im = document.getElementById('ai-cta-img');
+        if (im && r) im.src = r.url;
+      }).catch(() => {});
+
+      // Recommendations
+      try {
+        const { items } = await db.integrations.recommendations(8);
+        if (items && items.length) {
+          document.getElementById('recs-section').classList.remove('hidden');
+          document.getElementById('recs-strip').innerHTML = items.map(p =>
+            '<a href="/places?q=' + encodeURIComponent(p.city || p.name) + '" class="dest-card">' +
+              (p.image_url ? '<img src="' + p.image_url + '" alt="' + p.name + '">' : '<img alt="">') +
+              '<div class="grad"></div>' +
+              '<span class="temp">' + p.type + '</span>' +
+              '<div class="meta"><div class="name">' + p.name + '</div><div class="country">' + (p.city || '') + '</div></div>' +
+            '</a>'
+          ).join('');
+        }
+      } catch (e) {}
+
+      // Stats + recent bookings
+      try {
+        const [trips, bookings] = await Promise.all([
+          db.trips.list().catch(() => []),
+          db.entities.Booking.filter({ created_by: user.email }, '-created_date', 50).catch(() => []),
+        ]);
+        document.getElementById('stat-trips').textContent = trips.filter(t => t.status !== 'cancelled').length;
+        document.getElementById('stat-bookings').textContent = bookings.filter(b => b.status === 'confirmed').length;
+
+        if (bookings.length) {
+          const list = document.getElementById('bookings-list');
+          list.innerHTML = bookings.slice(0, 4).map(b =>
+            '<div class="booking-row">' +
+              '<div class="b-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>' +
+              '<div class="b-info">' +
+                '<div class="b-name">' + b.place_name + '</div>' +
+                '<div class="b-date">' + b.booking_date + '</div>' +
+              '</div>' +
+              '<span class="pill ' + (b.status === 'confirmed' ? 'pill-primary' : '') + '">' + b.status + '</span>' +
+            '</div>'
+          ).join('');
+        }
+      } catch (err) { console.warn(err); }
+
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

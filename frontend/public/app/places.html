@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Places · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+  <main class="app-main">
+    <div class="page-wrap">
+      <div class="places-hero">
+        <p class="page-eyebrow">Discover</p>
+        <h1>Places to <em>visit</em> &amp; book</h1>
+        <p>Search any city, country, or place type. Distances show in km when location is enabled.</p>
+        <div class="places-search-row">
+          <input id="places-search-input" type="text" placeholder='Try "Paris", "Bali", "sushi in Tokyo"…'>
+          <button class="btn btn-primary" id="places-search-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+          <button class="btn btn-outline" id="places-clear-btn">Clear</button>
+        </div>
+      </div>
+
+      <div id="places-geo-banner" class="places-geo hidden">
+        <span style="flex:1; display:inline-flex; align-items:center; gap:.6rem;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--teal)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Allow location access to see distance from where you are.
+        </span>
+        <button id="places-geo-btn">Enable</button>
+      </div>
+
+      <div class="places-tabs" id="places-tabs">
+        <button class="places-tab active" data-tab="all">All</button>
+        <button class="places-tab" data-tab="restaurant">Restaurants</button>
+        <button class="places-tab" data-tab="attraction">Attractions</button>
+        <button class="places-tab" data-tab="event">Events</button>
+        <span style="flex:1"></span>
+        <select id="places-sort" class="field-select" style="width:auto;height:42px;padding:0 2.5rem 0 1rem;border-radius:9999px;font-size:.82rem;font-weight:500;color:var(--text-2);background-color:#fff;">
+          <option value="featured">Featured</option>
+          <option value="rating">Top rated</option>
+          <option value="distance">Nearest</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+        </select>
+      </div>
+
+      <div id="places-out">
+        <div class="text-center" style="padding:3rem"><div class="spinner spinner-lg" style="margin:0 auto"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/places.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

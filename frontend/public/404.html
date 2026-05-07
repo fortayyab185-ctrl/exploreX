@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: #6EADAD;
+      --teal-600: #5C9999;
+      --teal-700: #4F8585;
+      --teal-50: #F0F6F6;
+      --sage: #869F8C;
+      --bg: #F7FAFA;
+      --bg-alt: #F0F5F2;
+      --text-1: #1A2E2E;
+      --text-2: #5A7070;
+      --text-3: #8FA3A3;
+      --border: #E4EDED;
+      --grad-primary: linear-gradient(135deg, #6EADAD 0%, #869F8C 100%);
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    h1, h2, h3 { font-family: 'Sora', sans-serif; }
+
+    /* Decorative blobs */
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.45;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, rgba(110,173,173,0.45), transparent 60%);
+      top: -150px; right: -200px;
+    }
+    body::after {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(134,159,140,0.4), transparent 60%);
+      bottom: -150px; left: -150px;
+    }
+
+    .wrap {
+      position: relative; z-index: 1;
+      text-align: center;
+      max-width: 540px;
+    }
+
+    .glyph {
+      width: 128px; height: 128px;
+      margin: 0 auto 2rem;
+      border-radius: 32px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 20px 60px rgba(26,46,46,0.10),
+        0 1px 0 rgba(255,255,255,0.5) inset;
+      position: relative;
+    }
+    .glyph::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 38px;
+      background: var(--grad-primary);
+      z-index: -1;
+      opacity: 0.18;
+      filter: blur(12px);
+    }
+    .glyph .num {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 3rem;
+      letter-spacing: -0.04em;
+      background: var(--grad-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.4rem 0.95rem;
+      border-radius: 9999px;
+      background: var(--teal-50);
+      color: var(--teal-700);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .eyebrow .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 0 3px rgba(110,173,173,0.18);
+    }
+
+    h1 {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: clamp(2rem, 4.5vw, 2.85rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text-1);
+      margin-bottom: 0.85rem;
+    }
+    h1 em { font-style: normal; color: var(--teal-700); }
+    p.sub {
+      font-size: 1rem;
+      color: var(--text-2);
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto 2rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      height: 48px;
+      padding: 0 1.4rem;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(110,173,173,0.32), 0 1px 2px rgba(110,173,173,0.18);
+    }
+    .btn-primary:hover {
+      background: var(--teal-600);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(110,173,173,0.4);
+    }
+    .btn-outline {
+      background: #fff;
+      color: var(--teal-700);
+      border-color: var(--teal);
+    }
+    .btn-outline:hover {
+      background: var(--teal-50);
+    }
+
+    .meta {
+      margin-top: 3rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="glyph">
+      <span class="num">404</span>
+    </div>
+
+    <h1>This trail leads <em>nowhere</em>.</h1>
+    <p class="sub">The page you're looking for doesn't exist — or the route shifted while you were exploring. Let's get you back to a known path.</p>
+
+    <div class="actions">
+      <a href="/" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Back to home
+      </a>
+      <a href="/explore" class="btn btn-outline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/></svg>
+        Explore the globe
+      </a>
+    </div>
+
+    <p class="meta">ExploreX · Error 404</p>
+  </div>
+</body>
+</html>

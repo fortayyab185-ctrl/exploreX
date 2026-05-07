@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .plan-grid {
+      display: grid; gap: 1.5rem;
+      margin-top: 2rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 800px) { .plan-grid { grid-template-columns: repeat(3, 1fr); } }
+    .plan-card {
+      padding: 2.25rem 2rem;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      background: var(--card);
+      display: flex; flex-direction: column;
+      gap: 1.15rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform .3s, box-shadow .3s, border-color .25s;
+      position: relative;
+    }
+    .plan-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    .plan-card.featured {
+      border-color: var(--teal);
+      box-shadow: 0 24px 48px -16px rgba(110,173,173,0.32);
+      transform: translateY(-3px);
+    }
+    .plan-card.featured:hover { transform: translateY(-8px); }
+    .plan-card .head {
+      padding-bottom: 1.15rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .plan-card h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.4rem; font-weight: 600;
+      color: var(--text-1);
+    }
+    .plan-card .price {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 2.5rem; line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text-1);
+    }
+    .plan-card .price small {
+      font-size: .9rem;
+      color: var(--text-3);
+      font-weight: 400;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .plan-card .price-orig {
+      color: var(--text-3);
+      text-decoration: line-through;
+      font-size: 1rem;
+      margin-right: .5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+    }
+    .plan-card ul {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column;
+      gap: .65rem; flex: 1;
+    }
+    .plan-card ul li {
+      font-size: .9rem;
+      color: var(--text-1);
+      display: flex; gap: .55rem;
+      line-height: 1.5;
+    }
+    .plan-card ul li::before {
+      content: ''; flex-shrink: 0;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--teal-50) url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 6L5 8.5L9.5 3.5' stroke='%234F8585' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/auto no-repeat;
+      margin-top: 1px;
+    }
+    .save-pill {
+      display: inline-block;
+      padding: .35rem .85rem;
+      border-radius: 9999px;
+      background: rgba(106,175,141,0.16);
+      color: #4A7C5E;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+  <main class="app-main">
+    <div class="page-wrap">
+      <p class="page-eyebrow">Pricing</p>
+      <h1 class="page-title">Choose Your <em>Journey</em></h1>
+      <p class="page-sub">Find the perfect plan for your travel style. Free to start. Upgrade anytime.</p>
+
+      <div id="trial-area"></div>
+
+      <div id="plans-out" class="plan-grid">
+        <div class="text-center" style="padding:3rem;grid-column:1/-1"><div class="spinner spinner-lg" style="margin:0 auto"></div></div>
+      </div>
+
+      <h2 style="font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:600;color:var(--text-1);margin-top:3.5rem;margin-bottom:.6rem">Use your points for a discount</h2>
+      <p class="text-muted text-sm" style="margin-bottom:1.25rem">Redeem accumulated points for plan discounts. Manage redemption from your <a href="/profile" style="color:var(--teal-700);text-decoration:underline;font-weight:500">profile</a>.</p>
+      <div id="rewards-tiers"></div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/pricing.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

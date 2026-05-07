@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .w-stat {
+      text-align: center; padding: 1.15rem 1rem;
+      border-radius: 14px;
+      background: var(--background);
+      border: 1px solid var(--border-subtle);
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .w-stat:hover { border-color: var(--teal-50); box-shadow: var(--shadow-xs); }
+    .w-stat .ic {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--teal-50);
+      color: var(--teal-700);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto .65rem;
+    }
+    .w-stat .l {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .65rem; font-weight: 600;
+      color: var(--text-3);
+      margin-bottom: .35rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .w-stat .v {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem; font-weight: 600;
+      color: var(--text-1);
+    }
+
+    .forecast-card {
+      padding: 1.25rem 1rem;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+      box-shadow: var(--shadow-xs);
+      transition: box-shadow .25s, transform .25s;
+    }
+    .forecast-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .forecast-card .day {
+      font-family: 'Sora', sans-serif;
+      font-size: .95rem; font-weight: 600;
+      color: var(--text-1);
+    }
+    .forecast-card .cond {
+      font-size: .8rem; color: var(--text-2);
+      margin-top: .35rem;
+    }
+    .forecast-card .temps {
+      margin-top: .65rem; font-size: 1rem;
+      font-family: 'Sora', sans-serif; font-weight: 600;
+      color: var(--text-1);
+    }
+    .forecast-card .temps .lo { color: var(--text-3); font-weight: 500; }
+  </style>
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+  <main class="app-main">
+    <div class="page-wrap">
+      <div class="page-header">
+        <p class="page-eyebrow">Live Data</p>
+        <h1 class="page-title">Weather <em>Insights</em></h1>
+        <p class="page-sub">Real conditions from OpenWeatherMap, plus outfit & activity tips for your destination.</p>
+      </div>
+
+      <div style="display:flex;gap:.5rem;margin-bottom:2rem">
+        <input id="city-input" class="field-input" placeholder="Enter a city…" style="flex:1">
+        <button id="check-btn" class="btn btn-primary">
+          <span id="check-label">Check</span>
+        </button>
+      </div>
+
+      <div id="weather-out">
+        <div class="empty">
+          <div class="empty-icon"><i data-lucide="cloud-sun" class="icon-md text-primary"></i></div>
+          <h3 class="empty-title">Check the weather</h3>
+          <p class="empty-sub">Enter a destination to see conditions, what to wear, and what to do.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('app:ready', () => {
+      const params = new URLSearchParams(location.search);
+      if (params.get('city')) {
+        document.getElementById('city-input').value = params.get('city');
+        loadWeather(params.get('city'));
+      }
+      document.getElementById('check-btn').addEventListener('click', () => {
+        loadWeather(document.getElementById('city-input').value.trim());
+      });
+      document.getElementById('city-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadWeather(e.currentTarget.value.trim());
+      });
+    });
+
+    async function loadWeather(city) {
+      if (!city) return toast.error('Please enter a city');
+      const out = document.getElementById('weather-out');
+      const btn = document.getElementById('check-btn');
+      const lab = document.getElementById('check-label');
+      btn.disabled = true; lab.textContent = 'Loading…';
+      out.innerHTML = '<div class="text-center" style="padding:3rem"><div class="spinner spinner-lg" style="margin:0 auto"></div></div>';
+
+      try {
+        const data = await db.integrations.weather(city);
+        out.innerHTML = renderWeather(data);
+        lucide.createIcons();
+      } catch (e) {
+        out.innerHTML = `<div class="empty"><h3 class="empty-title">Couldn't fetch weather</h3><p class="empty-sub">${e.message}. Try a city name like "Paris" or "Tokyo".</p></div>`;
+      } finally {
+        btn.disabled = false; lab.textContent = 'Check';
+      }
+    }
+
+    function titleCase(s) {
+      return (s || '').split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+
+    function renderWeather(d) {
+      const c = d.current || {};
+      const cityLabel = titleCase(d.city || '');
+      const isLive = d.source && d.source.indexOf('openweathermap') === 0;
+      const sourceLine = isLive
+        ? (d.source === 'openweathermap'
+            ? '<i data-lucide="check-circle" style="width:13px;height:13px;display:inline-block;vertical-align:middle;color:hsl(140 60% 35%)"></i> Live data from OpenWeatherMap'
+            : '<i data-lucide="check-circle" style="width:13px;height:13px;display:inline-block;vertical-align:middle;color:hsl(140 60% 35%)"></i> Live data from OpenWeatherMap (showed weather for ' + titleCase(d.city) + ', the capital of ' + (d.requested || '') + ')')
+        : '<i data-lucide="info" style="width:13px;height:13px;display:inline-block;vertical-align:middle"></i> Sample data — set <code>OPENWEATHER_API_KEY</code> in <code>backend/.env</code> for live forecasts (free key at openweathermap.org)';
+
+      return `
+        <div class="glass-card mb-4">
+          <h2 style="font-size:1.5rem">${cityLabel}${d.country ? ', ' + d.country : ''}</h2>
+          ${d.requested && d.requested.toLowerCase() !== (d.city || '').toLowerCase() && isLive ? '<p class="text-xs text-muted" style="margin-top:.25rem">Showing weather for ' + cityLabel + ', the capital of ' + escapeXml(d.requested) + '</p>' : ''}
+          <div class="grid grid-4 mt-4">
+            <div class="w-stat"><div class="ic"><i data-lucide="thermometer"></i></div><div class="l">Temperature</div><div class="v">${c.temperature || '—'}</div></div>
+            <div class="w-stat"><div class="ic"><i data-lucide="sun"></i></div><div class="l">Conditions</div><div class="v">${c.conditions || '—'}</div></div>
+            <div class="w-stat"><div class="ic"><i data-lucide="thermometer-snowflake"></i></div><div class="l">Feels Like</div><div class="v">${c.feels_like || '—'}</div></div>
+            <div class="w-stat"><div class="ic"><i data-lucide="wind"></i></div><div class="l">Wind · Humidity</div><div class="v">${c.wind || '—'} · ${c.humidity || '—'}</div></div>
+          </div>
+        </div>
+
+        ${(d.forecast || []).length ? `
+        <div class="glass-card mb-4">
+          <h3 style="font-size:1.25rem;margin-bottom:1rem">3-Day Forecast</h3>
+          <div class="grid grid-3">
+            ${d.forecast.map(f => `
+              <div class="forecast-card">
+                <div class="day">${f.day}</div>
+                <div class="cond">${f.conditions}</div>
+                <div class="temps"><span>${f.high}</span> / <span class="lo">${f.low}</span></div>
+              </div>`).join('')}
+          </div>
+        </div>` : ''}
+
+        <div class="grid grid-2">
+          <div class="glass-card">
+            <div class="row gap-2 mb-3"><i data-lucide="shirt" class="icon-md text-primary"></i><h3 style="font-size:1.25rem">What to Wear</h3></div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:.625rem">
+              ${(d.outfit_suggestions || []).map(s => `
+                <li style="display:flex;gap:.75rem;font-size:.875rem">
+                  <span style="margin-top:.625rem;width:12px;height:1px;background:var(--primary);flex-shrink:0"></span>${s}
+                </li>`).join('')}
+            </ul>
+          </div>
+          <div class="glass-card">
+            <div class="row gap-2 mb-3"><i data-lucide="sun" class="icon-md text-primary"></i><h3 style="font-size:1.25rem">Recommended</h3></div>
+            <div class="col">
+              ${(d.activity_recommendations || []).map(a => `
+                <div style="padding:1rem 1.1rem;border-radius:12px;background:var(--background);border:1px solid var(--border-subtle);margin-bottom:.55rem">
+                  <div style="font-family:'Sora',sans-serif;font-size:.95rem;font-weight:600;color:var(--text-1)">${a.activity}</div>
+                  <div style="font-size:.82rem;color:var(--text-2);margin-top:.35rem;line-height:1.5">${a.reason}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        ${(d.things_to_avoid || []).length ? `
+        <div class="glass-card mt-4">
+          <div class="row gap-2 mb-3"><i data-lucide="umbrella" class="icon-md" style="color:var(--destructive)"></i><h3 style="font-size:1.25rem">Things to Avoid</h3></div>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:.5rem">
+            ${d.things_to_avoid.map(t => `
+              <li style="display:flex;gap:.75rem;font-size:.875rem;color:var(--muted-foreground)">
+                <span style="margin-top:.625rem;width:12px;height:1px;background:var(--destructive);flex-shrink:0"></span>${t}
+              </li>`).join('')}
+          </ul>
+        </div>` : ''}
+
+        <p class="text-tiny text-muted mt-4 text-center" style="display:flex;align-items:center;justify-content:center;gap:.4rem;flex-wrap:wrap">${sourceLine}</p>
+      `;
+    }
+
+    function escapeXml(s) {
+      return (s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+    }
+  </script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .profile-header {
+      display: flex; align-items: center; gap: 1.75rem;
+      padding: 2.25rem;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+    @media (max-width: 700px) { .profile-header { flex-direction: column; text-align: center; gap: 1.25rem; } }
+    .profile-header .av {
+      width: 88px; height: 88px; border-radius: 50%;
+      background: var(--grad-primary);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 1.85rem; font-weight: 600;
+      flex-shrink: 0; overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .profile-header .av img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-header h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.75rem; font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-1);
+    }
+    .profile-header .email {
+      color: var(--text-3);
+      font-size: .9rem;
+      margin-top: .35rem;
+    }
+    .points-hero {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 2rem;
+      padding: 2rem 2.25rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(212,168,92,0.16), rgba(212,168,92,0.06));
+      border: 1px solid rgba(212,168,92,0.32);
+    }
+    .points-hero .label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .7rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #8A6B2F;
+    }
+    .points-hero .value {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 2.85rem; line-height: 1;
+      letter-spacing: -0.02em;
+      color: #6B5320;
+      margin-top: .45rem;
+    }
+    .points-hero .value .star {
+      color: var(--warning);
+      margin-right: .45rem;
+      font-size: 2.1rem;
+      vertical-align: text-top;
+    }
+    .grid-section {
+      display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+    }
+    @media (min-width: 1000px) {
+      .grid-section { grid-template-columns: 1fr 1fr; }
+    }
+    .card h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.2rem; font-weight: 600;
+      color: var(--text-1);
+    }
+  </style>
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+  <main class="app-main">
+    <div class="page-wrap">
+      <p class="page-eyebrow">Profile</p>
+      <h1 class="page-title">Your <em>account</em></h1>
+
+      <div class="profile-header" id="profile-header">
+        <div class="av" id="profile-avatar">EX</div>
+        <div style="flex:1">
+          <h1 id="profile-name">Explorer</h1>
+          <p class="email" id="profile-email">user@example.com</p>
+          <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap" id="profile-meta"></div>
+        </div>
+        <div>
+          <button class="btn btn-outline" id="edit-profile-btn">Edit profile</button>
+        </div>
+      </div>
+
+      <div class="points-hero">
+        <div>
+          <div class="label">Points balance</div>
+          <div class="value"><span class="star">★</span><span id="points-balance">0</span></div>
+        </div>
+        <div style="font-size:.9rem;color:#6B5320;max-width:380px;line-height:1.55">
+          Earn points for trips, bookings, daily logins, and connections.
+          Redeem them for plan discounts.
+        </div>
+      </div>
+
+      <div class="grid-section">
+        <div class="card">
+          <h2 style="font-size:1.25rem;margin-bottom:1rem">Redeem rewards</h2>
+          <div id="rewards-list">
+            <div class="text-center" style="padding:2rem"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 style="font-size:1.25rem;margin-bottom:1rem">Points history</h2>
+          <div id="history-out">
+            <div class="text-center" style="padding:2rem"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem" id="prefs-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+          <h2 style="font-size:1.25rem">Preferences</h2>
+          <span class="text-xs text-muted" id="prefs-status">Saved automatically</span>
+        </div>
+        <div id="prefs-out"><div class="spinner"></div></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/profile.js"></script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>

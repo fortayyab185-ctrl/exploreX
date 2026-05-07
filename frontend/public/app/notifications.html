@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications · ExploreX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/app.css">
+  <style>
+    .n-row {
+      display: flex; gap: 1rem;
+      padding: 1.15rem 1.4rem;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background .2s;
+      align-items: flex-start;
+      cursor: pointer;
+      position: relative;
+    }
+    .n-row:hover { background: var(--hover-bg); }
+    .n-row.unread {
+      background: rgba(110,173,173,0.04);
+    }
+    .n-row.unread::before {
+      content: ''; position: absolute; left: 0; top: 14px; bottom: 14px;
+      width: 3px; background: var(--teal); border-radius: 0 3px 3px 0;
+    }
+    .n-row:last-child { border-bottom: 0; }
+    .n-ico {
+      width: 40px; height: 40px;
+      border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--teal-50); color: var(--teal-700);
+    }
+    .n-ico.booking { background: var(--teal-50); color: var(--teal-700); }
+    .n-ico.trip_reminder { background: rgba(134,159,140,0.18); color: var(--sage-600); }
+    .n-ico.social  { background: rgba(180,200,210,0.30); color: #5A7B8A; }
+    .n-ico.weather { background: rgba(212,168,92,0.18); color: #8A6B2F; }
+    .n-ico.points  { background: rgba(212,168,92,0.18); color: #8A6B2F; }
+    .n-ico.system  { background: var(--muted); color: var(--text-2); }
+    .n-row .n-title { font-family: 'Sora', sans-serif; font-size: .95rem; font-weight: 600; color: var(--text-1); }
+    .n-row .n-msg { font-size: .85rem; color: var(--text-2); margin-top: .2rem; line-height: 1.5; }
+    .n-row .n-time { font-size: .72rem; color: var(--text-3); margin-top: .35rem; }
+    .n-row .n-del {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: transparent; border: 0;
+      color: var(--text-3);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s;
+      cursor: pointer;
+      opacity: 0;
+    }
+    .n-row:hover .n-del { opacity: 1; }
+    .n-row .n-del:hover { background: rgba(204,112,112,0.10); color: var(--destructive); }
+  </style>
+</head>
+<body>
+  <div id="app-nav-slot"></div>
+  <main class="app-main">
+    <div class="page-wrap" style="max-width:760px">
+      <div class="page-header row-between">
+        <div>
+          <p class="page-eyebrow">Inbox</p>
+          <h1 class="page-title">Notifications</h1>
+        </div>
+        <button id="mark-all" class="btn btn-outline"><i data-lucide="check-check" class="icon-sm"></i> Mark all read</button>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden">
+        <div id="n-list"><div class="text-center" style="padding:3rem"><div class="spinner spinner-lg" style="margin:0 auto"></div></div></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="/js/sdk.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    const ICONS = { booking: 'bookmark', trip_reminder: 'calendar', social: 'users', weather: 'cloud-sun', points: 'star', system: 'bell' };
+    let me, all = [];
+
+    document.addEventListener('app:ready', async (e) => {
+      me = e.detail.user;
+      await load();
+      document.getElementById('mark-all').addEventListener('click', markAll);
+    });
+
+    async function load() {
+      try {
+        all = await db.entities.Notification.filter({ created_by: me.email }, '-created_date', 200);
+        render();
+      } catch (e) { toast.error(e.message); }
+    }
+
+    function render() {
+      const out = document.getElementById('n-list');
+      if (!all.length) {
+        out.innerHTML = `
+          <div class="empty">
+            <div class="empty-icon"><i data-lucide="bell" class="icon-md text-primary"></i></div>
+            <h3 class="empty-title">No notifications</h3>
+            <p class="empty-sub">We'll let you know when something happens.</p>
+          </div>`;
+        lucide.createIcons();
+        return;
+      }
+      out.innerHTML = all.map(n => `
+        <div class="n-row ${n.read ? '' : 'unread'}" onclick="openN('${n.id}', '${n.link || ''}')">
+          <div class="n-ico ${n.type || 'system'}"><i data-lucide="${ICONS[n.type] || 'bell'}"></i></div>
+          <div style="flex:1;min-width:0">
+            <div class="n-title">${n.title}</div>
+            <div class="n-msg">${n.message}</div>
+            <div class="n-time">${new Date(n.created_date).toLocaleString()}</div>
+          </div>
+          <button class="n-del" onclick="event.stopPropagation();delN('${n.id}')" aria-label="Delete"><i data-lucide="trash-2" class="icon-sm"></i></button>
+        </div>`).join('');
+      lucide.createIcons();
+    }
+
+    window.openN = async function (id, link) {
+      try { await db.entities.Notification.update(id, { read: true }); } catch (e) {}
+      if (link) window.location.href = link;
+      else load();
+    };
+
+    window.delN = async function (id) {
+      try { await db.entities.Notification.remove(id); load(); } catch (e) {}
+    };
+
+    async function markAll() {
+      try {
+        await Promise.all(all.filter(n => !n.read).map(n => db.entities.Notification.update(n.id, { read: true })));
+        toast.success('All marked read');
+        load();
+      } catch (e) { toast.error(e.message); }
+    }
+  </script>
+  <script src="/js/chatbot.js"></script>
+</body>
+</html>
