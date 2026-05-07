@@ -4,24 +4,24 @@
    See README.md for setup instructions.
    ═══════════════════════════════════════════════════════════════════════════ */
 require('dotenv').config();
-const express  = require('express');
-const cors     = require('cors');
-const bcrypt   = require('bcryptjs');
-const jwt      = require('jsonwebtoken');
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const path     = require('path');
-const fs       = require('fs');
+const path = require('path');
+const fs = require('fs');
 let multer;
-try { multer = require('multer'); } catch(e) { multer = null; }
+try { multer = require('multer'); } catch (e) { multer = null; }
 
-const app  = express();
-const PORT                = process.env.PORT || 3001;
-const JWT_SECRET          = process.env.JWT_SECRET || 'explorex-super-secret-jwt-key-2024';
-const MONGO_URI           = process.env.MONGO_URI   || 'mongodb://localhost:27017/explorex';
-const GROQ_API_KEY        = process.env.GROQ_API_KEY        || '';
+const app = express();
+const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'explorex-super-secret-jwt-key-2024';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/explorex';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || '';
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY || '';
-const GOOGLE_CLIENT_ID    = process.env.GOOGLE_CLIENT_ID    || '';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
 // ─── MongoDB Connection ────────────────────────────────────────────────────────
 mongoose.connect(MONGO_URI)
@@ -35,48 +35,48 @@ const ts = {
 };
 
 const UserSchema = new mongoose.Schema({
-  email:             { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password_hash:     { type: String, required: false, default: '' },
-  full_name:         { type: String, default: '' },
-  home_city:         { type: String, default: '' },
-  bio:               { type: String, default: '' },
-  interests:         { type: [String], default: [] },
-  dietary:           { type: String, default: 'No restrictions' },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password_hash: { type: String, required: false, default: '' },
+  full_name: { type: String, default: '' },
+  home_city: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  interests: { type: [String], default: [] },
+  dietary: { type: String, default: 'No restrictions' },
   budget_preference: { type: String, default: 'moderate' },
-  travel_style:      { type: String, default: 'balanced' },
-  points:            { type: Number, default: 0 },
-  last_login_date:   { type: String, default: '' },         // YYYY-MM-DD for daily login points
+  travel_style: { type: String, default: 'balanced' },
+  points: { type: Number, default: 0 },
+  last_login_date: { type: String, default: '' },         // YYYY-MM-DD for daily login points
 
   // User preferences — controls UI behavior and chatbot/planner personalization.
   // We store them flat under `preferences` so the frontend can PATCH the whole
   // bag in one call without conflicts with the top-level identity fields.
   preferences: {
-    theme:             { type: String, enum: ['system','light','dark'], default: 'system' },
-    distance_unit:     { type: String, enum: ['km','mi'], default: 'km' },
-    currency_display:  { type: String, default: 'AED' },
+    theme: { type: String, enum: ['system', 'light', 'dark'], default: 'system' },
+    distance_unit: { type: String, enum: ['km', 'mi'], default: 'km' },
+    currency_display: { type: String, default: 'AED' },
     default_travelers: { type: Number, default: 1 },
-    default_budget_tier: { type: String, enum: ['budget','moderate','premium','luxury'], default: 'moderate' },
+    default_budget_tier: { type: String, enum: ['budget', 'moderate', 'premium', 'luxury'], default: 'moderate' },
     default_trip_duration_days: { type: Number, default: 3 },
-    notify_email:      { type: Boolean, default: true },
-    notify_in_app:     { type: Boolean, default: true },
-    weekly_digest:     { type: Boolean, default: false },
-    auto_geo:          { type: Boolean, default: true },     // ask for location automatically
-    home_currency:     { type: String, default: 'AED' },
-    language:          { type: String, default: 'en' },
+    notify_email: { type: Boolean, default: true },
+    notify_in_app: { type: Boolean, default: true },
+    weekly_digest: { type: Boolean, default: false },
+    auto_geo: { type: Boolean, default: true },     // ask for location automatically
+    home_currency: { type: String, default: 'AED' },
+    language: { type: String, default: 'en' },
   },
 
-  membership:        { type: String, enum: ['free','medium','high'], default: 'free' },
-  membership_until:  { type: Date,   default: null },
+  membership: { type: String, enum: ['free', 'medium', 'high'], default: 'free' },
+  membership_until: { type: Date, default: null },
 
-  trial_active:      { type: Boolean, default: false },
-  trial_start_date:  { type: Date,    default: null },
-  trial_used:        { type: Boolean, default: false },
+  trial_active: { type: Boolean, default: false },
+  trial_start_date: { type: Date, default: null },
+  trial_used: { type: Boolean, default: false },
 
-  stripe_customer_id:     { type: String, default: '' },
+  stripe_customer_id: { type: String, default: '' },
   stripe_subscription_id: { type: String, default: '' },
 
-  google_id:   { type: String, default: '' },
-  avatar_url:  { type: String, default: '' },
+  google_id: { type: String, default: '' },
+  avatar_url: { type: String, default: '' },
 
   ...ts,
 });
@@ -84,177 +84,177 @@ const UserSchema = new mongoose.Schema({
 // A "Trip" is the top-level container — destination + date range. Bookings
 // belong to a trip and live within its window.
 const TripSchema = new mongoose.Schema({
-  created_by:  { type: String, required: true },
+  created_by: { type: String, required: true },
   destination_country: { type: String, required: true },
-  destination_city:    { type: String, default: '' },
-  start_date:  { type: String, required: true },          // ISO YYYY-MM-DD
-  end_date:    { type: String, required: true },          // ISO YYYY-MM-DD
-  travelers:   { type: Number, default: 1 },
-  budget:      { type: Number, default: 0 },
-  notes:       String,
+  destination_city: { type: String, default: '' },
+  start_date: { type: String, required: true },          // ISO YYYY-MM-DD
+  end_date: { type: String, required: true },          // ISO YYYY-MM-DD
+  travelers: { type: Number, default: 1 },
+  budget: { type: Number, default: 0 },
+  notes: String,
   cover_image: String,
-  status:      { type: String, enum: ['planned','active','completed','cancelled'], default: 'planned' },
+  status: { type: String, enum: ['planned', 'active', 'completed', 'cancelled'], default: 'planned' },
   // Points-tracking flags so we don't double-award
-  points_started_awarded:   { type: Boolean, default: false },
+  points_started_awarded: { type: Boolean, default: false },
   points_completed_awarded: { type: Boolean, default: false },
   cancelled_at: { type: Date, default: null },            // for the 24h re-book cooldown
   ...ts,
 });
 
 const BookingSchema = new mongoose.Schema({
-  created_by:        { type: String, required: true },
-  trip_id:           { type: String, default: '' },        // optional link to a Trip
-  place_id:          String,
-  place_name:        { type: String, required: true },
-  place_type:        String,
-  place_image:       String,
-  booking_date:      { type: String, required: true },
-  booking_time:      String,
-  guests:            { type: Number, default: 1 },
-  status:            { type: String, enum: ['confirmed','pending','cancelled','completed'], default: 'confirmed' },
-  total_price:       Number,
-  notes:             String,
+  created_by: { type: String, required: true },
+  trip_id: { type: String, default: '' },        // optional link to a Trip
+  place_id: String,
+  place_name: { type: String, required: true },
+  place_type: String,
+  place_image: String,
+  booking_date: { type: String, required: true },
+  booking_time: String,
+  guests: { type: Number, default: 1 },
+  status: { type: String, enum: ['confirmed', 'pending', 'cancelled', 'completed'], default: 'confirmed' },
+  total_price: Number,
+  notes: String,
   confirmation_code: String,
   // Payment fields (Stripe one-time checkout for paid bookings)
-  payment_status:    { type: String, enum: ['unpaid','pending','paid','refunded','free'], default: 'free' },
-  payment_amount:    Number,
-  payment_method:    String,                              // 'stripe' | etc.
+  payment_status: { type: String, enum: ['unpaid', 'pending', 'paid', 'refunded', 'free'], default: 'free' },
+  payment_amount: Number,
+  payment_method: String,                              // 'stripe' | etc.
   stripe_session_id: String,
   ...ts,
 });
 
 const ConnectionSchema = new mongoose.Schema({
-  created_by:   { type: String, required: true },
-  from_user:    { type: String, required: true },
-  from_name:    String,
-  to_user:      { type: String, required: true },
-  to_name:      String,
-  status:       { type: String, enum: ['pending','accepted','declined'], default: 'pending' },
-  message:      String,
-  city:         String,
+  created_by: { type: String, required: true },
+  from_user: { type: String, required: true },
+  from_name: String,
+  to_user: { type: String, required: true },
+  to_name: String,
+  status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'pending' },
+  message: String,
+  city: String,
   travel_dates: String,
   points_awarded: { type: Boolean, default: false },
   ...ts,
 });
 
 const ItinerarySchema = new mongoose.Schema({
-  created_by:      { type: String, required: true },
-  title:           { type: String, required: true },
-  date:            { type: String, required: true },
-  city:            { type: String, required: true },
-  country:         { type: String, default: '' },
-  activities:      { type: Array,  default: [] },
-  preferences:     String,
-  budget:          String,
+  created_by: { type: String, required: true },
+  title: { type: String, required: true },
+  date: { type: String, required: true },
+  city: { type: String, required: true },
+  country: { type: String, default: '' },
+  activities: { type: Array, default: [] },
+  preferences: String,
+  budget: String,
   weather_summary: String,
   ...ts,
 });
 
 const MessageSchema = new mongoose.Schema({
-  created_by:     { type: String, required: true },
-  sender_email:   { type: String, required: true },
-  sender_name:    String,
+  created_by: { type: String, required: true },
+  sender_email: { type: String, required: true },
+  sender_name: String,
   receiver_email: { type: String, required: true },
-  text:           { type: String, required: true },
-  read:           { type: Boolean, default: false },
+  text: { type: String, required: true },
+  read: { type: Boolean, default: false },
   ...ts,
 });
 
 const NotificationSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
-  title:      { type: String, required: true },
-  message:    { type: String, required: true },
-  type:       { type: String, enum: ['booking','trip_reminder','social','weather','system','points'], default: 'system' },
-  read:       { type: Boolean, default: false },
-  link:       String,
+  title: { type: String, required: true },
+  message: { type: String, required: true },
+  type: { type: String, enum: ['booking', 'trip_reminder', 'social', 'weather', 'system', 'points'], default: 'system' },
+  read: { type: Boolean, default: false },
+  link: String,
   ...ts,
 });
 
 const PlaceSchema = new mongoose.Schema({
-  created_by:        { type: String, required: true },
-  name:              { type: String, required: true },
-  type:              { type: String, enum: ['restaurant','attraction','event','hotel'], default: 'attraction' },
-  description:       String,
+  created_by: { type: String, required: true },
+  name: { type: String, required: true },
+  type: { type: String, enum: ['restaurant', 'attraction', 'event', 'hotel'], default: 'attraction' },
+  description: String,
   short_description: String,
-  image_url:         String,
-  location:          String,
-  city:              String,
-  rating:            Number,
-  price_level:       { type: String, enum: ['budget','moderate','premium','luxury'] },
-  category:          String,
-  opening_hours:     String,
-  phone:             String,
-  website:           String,
-  tags:              { type: [String], default: [] },
-  latitude:          Number,
-  longitude:         Number,
-  avg_price:         Number,
-  event_date:        String,
-  featured:          { type: Boolean, default: false },
-  capacity:          { type: Number, default: 4 },
-  country:           { type: String, default: '' },
+  image_url: String,
+  location: String,
+  city: String,
+  rating: Number,
+  price_level: { type: String, enum: ['budget', 'moderate', 'premium', 'luxury'] },
+  category: String,
+  opening_hours: String,
+  phone: String,
+  website: String,
+  tags: { type: [String], default: [] },
+  latitude: Number,
+  longitude: Number,
+  avg_price: Number,
+  event_date: String,
+  featured: { type: Boolean, default: false },
+  capacity: { type: Number, default: 4 },
+  country: { type: String, default: '' },
   ...ts,
 });
 
 const SubscriptionSchema = new mongoose.Schema({
-  created_by:       { type: String, required: true },
-  plan:             { type: String, enum: ['basic','medium','pro'], required: true },
-  price:            Number,
-  status:           { type: String, enum: ['active','cancelled','expired','trial'], default: 'active' },
-  start_date:       String,
-  end_date:         String,
-  auto_renew:       { type: Boolean, default: true },
-  trial_used:       { type: Boolean, default: false },
+  created_by: { type: String, required: true },
+  plan: { type: String, enum: ['basic', 'medium', 'pro'], required: true },
+  price: Number,
+  status: { type: String, enum: ['active', 'cancelled', 'expired', 'trial'], default: 'active' },
+  start_date: String,
+  end_date: String,
+  auto_renew: { type: Boolean, default: true },
+  trial_used: { type: Boolean, default: false },
   discount_applied: String,
   ...ts,
 });
 
 const FavoriteSchema = new mongoose.Schema({
-  created_by:  { type: String, required: true },
-  place_id:    { type: String, required: true },
-  place_name:  String,
-  place_type:  String,
+  created_by: { type: String, required: true },
+  place_id: { type: String, required: true },
+  place_name: String,
+  place_type: String,
   place_image: String,
-  city:        String,
-  country:     String,
+  city: String,
+  country: String,
   ...ts,
 });
 
 const TripInviteSchema = new mongoose.Schema({
-  created_by:    { type: String, required: true },
-  trip_name:     { type: String, required: true },
-  trip_id:       String,
+  created_by: { type: String, required: true },
+  trip_name: { type: String, required: true },
+  trip_id: String,
   inviter_email: { type: String, required: true },
-  inviter_name:  String,
+  inviter_name: String,
   invitee_email: { type: String, required: true },
-  status:        { type: String, enum: ['pending','accepted','declined'], default: 'pending' },
-  booking_ids:   { type: [String], default: [] },
-  trip_dates:    String,
-  message:       String,
+  status: { type: String, enum: ['pending', 'accepted', 'declined'], default: 'pending' },
+  booking_ids: { type: [String], default: [] },
+  trip_dates: String,
+  message: String,
   ...ts,
 });
 
 // History of point gains/spends for the /profile points history view
 const PointsLogSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
-  amount:     { type: Number, required: true },             // positive = earn, negative = spend
-  reason:     { type: String, required: true },
-  meta:       { type: Object, default: {} },
+  amount: { type: Number, required: true },             // positive = earn, negative = spend
+  reason: { type: String, required: true },
+  meta: { type: Object, default: {} },
   ...ts,
 });
 
-const User         = mongoose.model('User',         UserSchema);
-const Trip         = mongoose.model('Trip',         TripSchema);
-const Booking      = mongoose.model('Booking',      BookingSchema);
-const Connection   = mongoose.model('Connection',   ConnectionSchema);
-const Itinerary    = mongoose.model('Itinerary',    ItinerarySchema);
-const Message      = mongoose.model('Message',      MessageSchema);
+const User = mongoose.model('User', UserSchema);
+const Trip = mongoose.model('Trip', TripSchema);
+const Booking = mongoose.model('Booking', BookingSchema);
+const Connection = mongoose.model('Connection', ConnectionSchema);
+const Itinerary = mongoose.model('Itinerary', ItinerarySchema);
+const Message = mongoose.model('Message', MessageSchema);
 const Notification = mongoose.model('Notification', NotificationSchema);
-const Place        = mongoose.model('Place',        PlaceSchema);
+const Place = mongoose.model('Place', PlaceSchema);
 const Subscription = mongoose.model('Subscription', SubscriptionSchema);
-const TripInvite   = mongoose.model('TripInvite',   TripInviteSchema);
-const Favorite     = mongoose.model('Favorite',     FavoriteSchema);
-const PointsLog    = mongoose.model('PointsLog',    PointsLogSchema);
+const TripInvite = mongoose.model('TripInvite', TripInviteSchema);
+const Favorite = mongoose.model('Favorite', FavoriteSchema);
+const PointsLog = mongoose.model('PointsLog', PointsLogSchema);
 
 const MODELS = { Trip, Booking, Connection, Itinerary, Message, Notification, Place, Subscription, TripInvite, Favorite, PointsLog };
 
@@ -287,26 +287,26 @@ function formatUser(u) {
     trialRemainingMs = Math.max(0, 24 * 60 * 60 * 1000 - elapsed);
   }
   return {
-    id:                o._id?.toString() || o.id,
-    email:             o.email,
-    full_name:         o.full_name,
-    home_city:         o.home_city,
-    bio:               o.bio,
-    interests:         o.interests || [],
-    dietary:           o.dietary,
+    id: o._id?.toString() || o.id,
+    email: o.email,
+    full_name: o.full_name,
+    home_city: o.home_city,
+    bio: o.bio,
+    interests: o.interests || [],
+    dietary: o.dietary,
     budget_preference: o.budget_preference,
-    travel_style:      o.travel_style,
-    preferences:       o.preferences || {},
-    points:            o.points || 0,
-    membership:        o.membership || 'free',
-    effective_plan:    effective,
-    membership_until:  o.membership_until,
-    trial_active:      o.trial_active && trialRemainingMs > 0,
+    travel_style: o.travel_style,
+    preferences: o.preferences || {},
+    points: o.points || 0,
+    membership: o.membership || 'free',
+    effective_plan: effective,
+    membership_until: o.membership_until,
+    trial_active: o.trial_active && trialRemainingMs > 0,
     trial_remaining_ms: trialRemainingMs,
-    trial_used:        o.trial_used || false,
-    avatar_url:        o.avatar_url || '',
-    google_id:         o.google_id  || '',
-    created_date:      o.created_date,
+    trial_used: o.trial_used || false,
+    avatar_url: o.avatar_url || '',
+    google_id: o.google_id || '',
+    created_date: o.created_date,
   };
 }
 
@@ -360,7 +360,7 @@ function authMiddleware(req, res, next) {
     return res.status(401).json({ error: 'Unauthorized' });
   try {
     const payload = jwt.verify(auth.slice(7), JWT_SECRET);
-    req.userId    = payload.userId;
+    req.userId = payload.userId;
     req.userEmail = payload.email;
     next();
   } catch {
@@ -370,14 +370,14 @@ function authMiddleware(req, res, next) {
 
 // ISO date helpers (treat dates as "calendar days" with no timezones)
 function isoDate(d) { return new Date(d).toISOString().slice(0, 10); }
-function todayISO()  { return new Date().toISOString().slice(0, 10); }
+function todayISO() { return new Date().toISOString().slice(0, 10); }
 
 // Two ranges overlap if startA <= endB AND startB <= endA (inclusive)
 function rangesOverlap(s1, e1, s2, e2) { return s1 <= e2 && s2 <= e1; }
 
 // ─── Generic CRUD factory (simple entities only — Trip/Booking have their own) ─
 function entityRouter(modelName) {
-  const Model  = MODELS[modelName];
+  const Model = MODELS[modelName];
   const router = express.Router();
 
   router.get('/', authMiddleware, async (req, res) => {
@@ -386,7 +386,7 @@ function entityRouter(modelName) {
       const query = {};
       Object.entries(filters).forEach(([k, v]) => { if (v !== '' && v !== undefined) query[k] = v; });
       const sortField = sort.startsWith('-') ? sort.slice(1) : sort;
-      const sortDir   = sort.startsWith('-') ? -1 : 1;
+      const sortDir = sort.startsWith('-') ? -1 : 1;
 
       const docs = await Model.find(query)
         .sort({ [sortField]: sortDir })
@@ -430,11 +430,11 @@ function entityRouter(modelName) {
       // Connection: pending → accepted awards +10 to both ends, once
       if (modelName === 'Connection' && before && before.status !== 'accepted' && req.body.status === 'accepted' && !before.points_awarded) {
         await Connection.findByIdAndUpdate(doc._id, { $set: { points_awarded: true } });
-        awardPoints(before.from_user, 10, 'Connection accepted',  { connection_id: before._id.toString() });
-        awardPoints(before.to_user,   10, 'Connection accepted',  { connection_id: before._id.toString() });
+        awardPoints(before.from_user, 10, 'Connection accepted', { connection_id: before._id.toString() });
+        awardPoints(before.to_user, 10, 'Connection accepted', { connection_id: before._id.toString() });
         // Notify both
-        Notification.create({ created_by: before.from_user, title: 'New travel buddy', message: 'You and ' + (before.to_name || before.to_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(()=>{});
-        Notification.create({ created_by: before.to_user,   title: 'New travel buddy', message: 'You and ' + (before.from_name || before.from_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(()=>{});
+        Notification.create({ created_by: before.from_user, title: 'New travel buddy', message: 'You and ' + (before.to_name || before.to_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(() => { });
+        Notification.create({ created_by: before.to_user, title: 'New travel buddy', message: 'You and ' + (before.from_name || before.from_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(() => { });
       }
 
       res.json(toJSON(doc));
@@ -500,7 +500,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
 
 app.patch('/api/auth/me', authMiddleware, async (req, res) => {
   try {
-    const allowed = ['full_name','home_city','bio','interests','dietary','budget_preference','travel_style','avatar_url'];
+    const allowed = ['full_name', 'home_city', 'bio', 'interests', 'dietary', 'budget_preference', 'travel_style', 'avatar_url'];
     const updates = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
@@ -564,8 +564,8 @@ app.post('/api/auth/google', async (req, res) => {
     let user = await User.findOne({ email: email.toLowerCase() });
     if (user) {
       const updates = {};
-      if (!user.full_name && name)     updates.full_name = name;
-      if (!user.google_id)             updates.google_id = googleId;
+      if (!user.full_name && name) updates.full_name = name;
+      if (!user.google_id) updates.google_id = googleId;
       if (!user.avatar_url && picture) updates.avatar_url = picture;
       if (Object.keys(updates).length) {
         await User.findByIdAndUpdate(user._id, { $set: updates });
@@ -589,16 +589,16 @@ app.post('/api/auth/start-trial', authMiddleware, async (req, res) => {
     if (u.trial_used) return res.status(400).json({ error: 'Trial already used' });
     u.trial_used = true; u.trial_active = true; u.trial_start_date = new Date();
     await u.save();
-    Notification.create({ created_by: u.email, title: 'Max plan trial started', message: 'You have 24 hours of full Max-plan access. Enjoy!', type: 'system', link: '/pricing' }).catch(()=>{});
+    Notification.create({ created_by: u.email, title: 'Max plan trial started', message: 'You have 24 hours of full Max-plan access. Enjoy!', type: 'system', link: '/pricing' }).catch(() => { });
     res.json(formatUser(u));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // ─── Rewards: redemption tiers ────────────────────────────────────────────────
 const REWARD_TIERS = [
-  { id: 'medium-10', cost: 500,  label: '10% off Pro plan',     kind: 'discount', plan: 'medium', percent: 10 },
-  { id: 'high-10',   cost: 1000, label: '10% off Max plan',     kind: 'discount', plan: 'high',   percent: 10 },
-  { id: 'medium-1m', cost: 2000, label: '1 free month Pro',     kind: 'free_month', plan: 'medium' },
+  { id: 'medium-10', cost: 500, label: '10% off Pro plan', kind: 'discount', plan: 'medium', percent: 10 },
+  { id: 'high-10', cost: 1000, label: '10% off Max plan', kind: 'discount', plan: 'high', percent: 10 },
+  { id: 'medium-1m', cost: 2000, label: '1 free month Pro', kind: 'free_month', plan: 'medium' },
 ];
 
 app.get('/api/rewards/tiers', authMiddleware, (_req, res) => res.json({ tiers: REWARD_TIERS }));
@@ -646,7 +646,7 @@ app.post('/api/rewards/redeem', authMiddleware, async (req, res) => {
       voucher = { kind: 'applied', message: 'Pro plan extended by 1 month — until ' + until.toLocaleDateString() };
     }
 
-    Notification.create({ created_by: u.email, title: 'Reward redeemed', message: tier.label + ' (-' + tier.cost + ' pts)', type: 'points', link: '/profile' }).catch(()=>{});
+    Notification.create({ created_by: u.email, title: 'Reward redeemed', message: tier.label + ' (-' + tier.cost + ' pts)', type: 'points', link: '/profile' }).catch(() => { });
     res.json({ ok: true, points: u.points, tier, voucher });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -656,18 +656,18 @@ app.get('/api/users', authMiddleware, async (req, res) => {
   try {
     const users = await User.find({}).lean();
     // Attach active-trip badge so Connect can show "Traveling to ..."
-    const activeTrips = await Trip.find({ status: { $in: ['planned','active'] }, end_date: { $gte: todayISO() }, start_date: { $lte: todayISO() } }).lean();
+    const activeTrips = await Trip.find({ status: { $in: ['planned', 'active'] }, end_date: { $gte: todayISO() }, start_date: { $lte: todayISO() } }).lean();
     const tripByEmail = {};
     activeTrips.forEach(t => { tripByEmail[t.created_by] = t; });
-    const futureTrips = await Trip.find({ status: { $in: ['planned','active'] }, start_date: { $gt: todayISO() } }).sort({ start_date: 1 }).lean();
+    const futureTrips = await Trip.find({ status: { $in: ['planned', 'active'] }, start_date: { $gt: todayISO() } }).sort({ start_date: 1 }).lean();
     const upcomingByEmail = {};
     futureTrips.forEach(t => { if (!upcomingByEmail[t.created_by]) upcomingByEmail[t.created_by] = t; });
 
     res.json(users.map(u => {
       const f = formatUser({ toObject: () => u });
-      const active   = tripByEmail[u.email];
+      const active = tripByEmail[u.email];
       const upcoming = upcomingByEmail[u.email];
-      f.active_trip   = active   ? { destination: [active.destination_city, active.destination_country].filter(Boolean).join(', '), end_date: active.end_date } : null;
+      f.active_trip = active ? { destination: [active.destination_city, active.destination_country].filter(Boolean).join(', '), end_date: active.end_date } : null;
       f.upcoming_trip = upcoming ? { destination: [upcoming.destination_city, upcoming.destination_country].filter(Boolean).join(', '), start_date: upcoming.start_date } : null;
       return f;
     }));
@@ -698,7 +698,7 @@ app.post('/api/ai/invoke', authMiddleware, async (req, res) => {
       body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: fullPrompt }], max_tokens: 2048, temperature: 0.7 }),
     });
     if (!r.ok) {
-      const errText = await r.text().catch(()=>r.statusText);
+      const errText = await r.text().catch(() => r.statusText);
       console.warn('Groq error:', r.status, errText.slice(0, 200));
       if (response_json_schema) return res.json({ result: mockAI(prompt) });
       return res.json({ result: 'AI is temporarily unavailable. Please try again.' });
@@ -724,16 +724,16 @@ function mockAI(prompt) {
       city,
       current: { temperature: '22°C', conditions: 'Partly Cloudy', humidity: '60%', wind: '15 km/h', feels_like: '21°C' },
       forecast: [
-        { day: 'Today',    high: '24°C', low: '16°C', conditions: 'Partly Cloudy' },
+        { day: 'Today', high: '24°C', low: '16°C', conditions: 'Partly Cloudy' },
         { day: 'Tomorrow', high: '26°C', low: '18°C', conditions: 'Sunny' },
         { day: 'Day After', high: '21°C', low: '15°C', conditions: 'Light Rain' },
       ],
-      outfit_suggestions: ['Light layers','Comfortable walking shoes','Sunglasses','Light jacket for evenings'],
+      outfit_suggestions: ['Light layers', 'Comfortable walking shoes', 'Sunglasses', 'Light jacket for evenings'],
       activity_recommendations: [
         { activity: 'Outdoor sightseeing', reason: 'Perfect mild weather for walking tours' },
-        { activity: 'Outdoor dining',      reason: 'Great patio weather today' },
+        { activity: 'Outdoor dining', reason: 'Great patio weather today' },
       ],
-      things_to_avoid: ['Heavy coats','Staying indoors all day'],
+      things_to_avoid: ['Heavy coats', 'Staying indoors all day'],
     };
   }
   // Mock itinerary — uses generic-but-plausible names so it's still helpful without GROQ
@@ -741,12 +741,12 @@ function mockAI(prompt) {
     title: 'A Perfect Day in ' + city,
     weather_summary: 'Beautiful sunny day in ' + city + ', around 24°C. Perfect for exploring!',
     activities: [
-      { time: '8:00 AM',  activity: 'Sunrise breakfast at a popular local café', location: city + ' city center', description: 'Start your day with the city\'s signature breakfast.', type: 'food', price_per_person: 15 },
-      { time: '10:00 AM', activity: 'Old town walking tour', location: 'Historic district',   description: 'Explore historic streets and architecture.', type: 'sightseeing', price_per_person: 20 },
-      { time: '12:30 PM', activity: 'Traditional lunch',     location: 'Market square',       description: 'Authentic local cuisine.', type: 'food', price_per_person: 25 },
-      { time: '2:00 PM',  activity: 'Museum visit',          location: 'Main city museum',    description: 'History and culture.', type: 'culture', price_per_person: 12 },
-      { time: '4:30 PM',  activity: 'Scenic viewpoint',      location: 'Hilltop park',        description: 'Panoramic views of the city.', type: 'sightseeing', price_per_person: 0 },
-      { time: '7:00 PM',  activity: 'Dinner & live music',   location: 'Waterfront district', description: 'End the day with great food and entertainment.', type: 'food', price_per_person: 45 },
+      { time: '8:00 AM', activity: 'Sunrise breakfast at a popular local café', location: city + ' city center', description: 'Start your day with the city\'s signature breakfast.', type: 'food', price_per_person: 15 },
+      { time: '10:00 AM', activity: 'Old town walking tour', location: 'Historic district', description: 'Explore historic streets and architecture.', type: 'sightseeing', price_per_person: 20 },
+      { time: '12:30 PM', activity: 'Traditional lunch', location: 'Market square', description: 'Authentic local cuisine.', type: 'food', price_per_person: 25 },
+      { time: '2:00 PM', activity: 'Museum visit', location: 'Main city museum', description: 'History and culture.', type: 'culture', price_per_person: 12 },
+      { time: '4:30 PM', activity: 'Scenic viewpoint', location: 'Hilltop park', description: 'Panoramic views of the city.', type: 'sightseeing', price_per_person: 0 },
+      { time: '7:00 PM', activity: 'Dinner & live music', location: 'Waterfront district', description: 'End the day with great food and entertainment.', type: 'food', price_per_person: 45 },
     ],
   };
 }
@@ -822,7 +822,7 @@ app.post('/api/config/about-video', authMiddleware, (req, res, next) => {
 async function seedPlacesIfEmpty() {
   try {
     const count = await Place.countDocuments();
-    if (count > 0) {return;}
+    if (count > 0) { return; }
     const seedData = [
       // PARIS
       { name: "Le Petit Bistro", city: "Paris", country: "France", type: "restaurant", price_level: "moderate", avg_price: 65, rating: 4.7, capacity: 4, image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=85", short_description: "Classic French bistro with seasonal menu", description: "Tucked in a cobblestone alley in the Marais, Le Petit Bistro serves rotating French classics with locally sourced ingredients.", opening_hours: "12:00 PM - 11:00 PM", featured: true, latitude: 48.857, longitude: 2.352 },
@@ -886,14 +886,14 @@ app.get('/api/bookings/availability', authMiddleware, async (req, res) => {
     const place = await Place.findById(place_id);
     if (!place) return res.status(404).json({ error: 'Place not found' });
     const cap = place.capacity || 4;
-    const filter = { place_id, booking_date: date, status: { $in: ['confirmed','pending'] } };
+    const filter = { place_id, booking_date: date, status: { $in: ['confirmed', 'pending'] } };
     if (time) filter.booking_time = time;
     const taken = await Booking.find(filter);
-    const used  = taken.reduce((s, b) => s + (b.guests || 1), 0);
+    const used = taken.reduce((s, b) => s + (b.guests || 1), 0);
     const remaining = Math.max(0, cap - used);
     const available = used < cap;
     let message = '';
-    if (!available)        message = 'This place is fully booked on ' + date + (time ? ' at ' + time : '') + '. Try another date or time.';
+    if (!available) message = 'This place is fully booked on ' + date + (time ? ' at ' + time : '') + '. Try another date or time.';
     else if (remaining <= 2) message = 'Hurry — only ' + remaining + ' spot(s) left on this date.';
     res.json({ available, remaining, capacity: cap, message });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -930,9 +930,9 @@ app.post('/api/trips', authMiddleware, async (req, res) => {
     // Date conflict check: any non-cancelled trip overlapping this range
     const overlapping = await Trip.findOne({
       created_by: req.userEmail,
-      status: { $in: ['planned','active','completed'] },
+      status: { $in: ['planned', 'active', 'completed'] },
       start_date: { $lte: end_date },
-      end_date:   { $gte: start_date },
+      end_date: { $gte: start_date },
     });
     if (overlapping) {
       return res.status(409).json({
@@ -955,7 +955,7 @@ app.post('/api/trips', authMiddleware, async (req, res) => {
       start_date, end_date, travelers: travelers || 1, budget: budget || 0, notes: notes || '', cover_image: cover_image || '',
     });
     awardPoints(req.userEmail, 50, 'Created trip', { trip_id: trip._id.toString(), destination: destination_country });
-    Notification.create({ created_by: req.userEmail, title: 'Trip created', message: 'Your trip to ' + destination_country + ' is set for ' + start_date + ' → ' + end_date + ' (+50 pts)', type: 'trip_reminder', link: '/bookings' }).catch(()=>{});
+    Notification.create({ created_by: req.userEmail, title: 'Trip created', message: 'Your trip to ' + destination_country + ' is set for ' + start_date + ' → ' + end_date + ' (+50 pts)', type: 'trip_reminder', link: '/bookings' }).catch(() => { });
     res.status(201).json(toJSON(trip));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -966,23 +966,23 @@ app.patch('/api/trips/:id', authMiddleware, async (req, res) => {
     if (!trip) return res.status(404).json({ error: 'Trip not found' });
     if (trip.created_by !== req.userEmail) return res.status(403).json({ error: 'Forbidden' });
 
-    const fields = ['destination_country','destination_city','start_date','end_date','travelers','budget','notes','cover_image','status'];
+    const fields = ['destination_country', 'destination_city', 'start_date', 'end_date', 'travelers', 'budget', 'notes', 'cover_image', 'status'];
     const updates = {};
     fields.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
     if (updates.start_date) updates.start_date = isoDate(updates.start_date);
-    if (updates.end_date)   updates.end_date   = isoDate(updates.end_date);
+    if (updates.end_date) updates.end_date = isoDate(updates.end_date);
     if (updates.start_date && updates.end_date && updates.start_date > updates.end_date) return res.status(400).json({ error: 'End date must be on or after the start date' });
 
     // If dates change, re-check conflicts
     if (updates.start_date || updates.end_date) {
       const newStart = updates.start_date || trip.start_date;
-      const newEnd   = updates.end_date   || trip.end_date;
+      const newEnd = updates.end_date || trip.end_date;
       const overlap = await Trip.findOne({
         _id: { $ne: trip._id },
         created_by: req.userEmail,
-        status: { $in: ['planned','active','completed'] },
+        status: { $in: ['planned', 'active', 'completed'] },
         start_date: { $lte: newEnd },
-        end_date:   { $gte: newStart },
+        end_date: { $gte: newStart },
       });
       if (overlap) return res.status(409).json({ error: 'New dates conflict with another trip (' + overlap.destination_country + ', ' + overlap.start_date + ' → ' + overlap.end_date + ')' });
     }
@@ -1012,7 +1012,7 @@ app.delete('/api/trips/:id', authMiddleware, async (req, res) => {
       trip.cancelled_at = new Date();
       await trip.save();
       // Cancel its child bookings too
-      await Booking.updateMany({ created_by: req.userEmail, trip_id: trip._id.toString(), status: { $in: ['confirmed','pending'] } }, { $set: { status: 'cancelled', updated_date: new Date() } });
+      await Booking.updateMany({ created_by: req.userEmail, trip_id: trip._id.toString(), status: { $in: ['confirmed', 'pending'] } }, { $set: { status: 'cancelled', updated_date: new Date() } });
     }
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1023,7 +1023,7 @@ app.get('/api/bookings', authMiddleware, async (req, res) => {
   try {
     const filter = { created_by: req.userEmail };
     if (req.query.trip_id) filter.trip_id = req.query.trip_id;
-    if (req.query.status)  filter.status  = req.query.status;
+    if (req.query.status) filter.status = req.query.status;
     const items = await Booking.find(filter).sort({ booking_date: -1 }).limit(parseInt(req.query.limit) || 500).lean();
     res.json(items.map(b => { b.id = b._id.toString(); delete b._id; delete b.__v; return b; }));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1059,7 +1059,7 @@ app.post('/api/bookings', authMiddleware, async (req, res) => {
         created_by: req.userEmail,
         booking_date,
         $or: [
-          body.place_id ? { place_id:  body.place_id  } : null,
+          body.place_id ? { place_id: body.place_id } : null,
           body.place_name ? { place_name: body.place_name } : null,
         ].filter(Boolean),
         status: { $ne: 'cancelled' },
@@ -1103,23 +1103,23 @@ async function sweepTripLifecycle() {
     const today = todayISO();
 
     // Started: trips whose start <= today and not yet awarded
-    const started = await Trip.find({ status: { $in: ['planned','active','completed'] }, start_date: { $lte: today }, points_started_awarded: false });
+    const started = await Trip.find({ status: { $in: ['planned', 'active', 'completed'] }, start_date: { $lte: today }, points_started_awarded: false });
     for (const t of started) {
       t.points_started_awarded = true;
       if (t.status === 'planned') t.status = 'active';
       await t.save();
       awardPoints(t.created_by, 100, 'Trip started', { trip_id: t._id.toString(), destination: t.destination_country });
-      Notification.create({ created_by: t.created_by, title: 'Trip started!', message: 'Your trip to ' + t.destination_country + ' has begun. Have a great time! (+100 pts)', type: 'trip_reminder', link: '/bookings' }).catch(()=>{});
+      Notification.create({ created_by: t.created_by, title: 'Trip started!', message: 'Your trip to ' + t.destination_country + ' has begun. Have a great time! (+100 pts)', type: 'trip_reminder', link: '/bookings' }).catch(() => { });
     }
 
     // Completed: trips whose end < today and not yet awarded
-    const ended = await Trip.find({ status: { $in: ['planned','active','completed'] }, end_date: { $lt: today }, points_completed_awarded: false });
+    const ended = await Trip.find({ status: { $in: ['planned', 'active', 'completed'] }, end_date: { $lt: today }, points_completed_awarded: false });
     for (const t of ended) {
       t.points_completed_awarded = true;
       t.status = 'completed';
       await t.save();
       awardPoints(t.created_by, 200, 'Trip completed', { trip_id: t._id.toString(), destination: t.destination_country });
-      Notification.create({ created_by: t.created_by, title: 'Trip completed', message: 'Welcome back from ' + t.destination_country + '! +200 points awarded.', type: 'trip_reminder', link: '/bookings' }).catch(()=>{});
+      Notification.create({ created_by: t.created_by, title: 'Trip completed', message: 'Welcome back from ' + t.destination_country + '! +200 points awarded.', type: 'trip_reminder', link: '/bookings' }).catch(() => { });
     }
   } catch (e) { console.warn('Trip lifecycle sweep error:', e.message); }
 }
@@ -1127,15 +1127,15 @@ setInterval(sweepTripLifecycle, 60 * 60 * 1000);
 setTimeout(sweepTripLifecycle, 5000);  // also run shortly after boot
 
 // ─── Stripe billing ───────────────────────────────────────────────────────────
-const STRIPE_SECRET_KEY     = process.env.STRIPE_SECRET_KEY     || '';
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
-const STRIPE_PRICE_MEDIUM   = process.env.STRIPE_PRICE_MEDIUM   || '';
-const STRIPE_PRICE_HIGH     = process.env.STRIPE_PRICE_HIGH     || '';
-const APP_URL               = process.env.APP_URL               || ('http://localhost:' + PORT);
+const STRIPE_PRICE_MEDIUM = process.env.STRIPE_PRICE_MEDIUM || '';
+const STRIPE_PRICE_HIGH = process.env.STRIPE_PRICE_HIGH || '';
+const APP_URL = process.env.APP_URL || ('http://localhost:' + PORT);
 
 let stripe = null;
 if (STRIPE_SECRET_KEY) {
-  try { stripe = require('stripe')(STRIPE_SECRET_KEY);}
+  try { stripe = require('stripe')(STRIPE_SECRET_KEY); }
   catch (e) { console.warn('Stripe init failed:', e.message); }
 }
 
@@ -1144,7 +1144,7 @@ const PLAN_TO_PRICE = { medium: STRIPE_PRICE_MEDIUM, high: STRIPE_PRICE_HIGH };
 app.post('/api/billing/checkout', authMiddleware, async (req, res) => {
   try {
     const { plan, coupon } = req.body;
-    if (!['medium','high'].includes(plan)) return res.status(400).json({ error: 'Invalid plan' });
+    if (!['medium', 'high'].includes(plan)) return res.status(400).json({ error: 'Invalid plan' });
     if (!stripe || !PLAN_TO_PRICE[plan]) {
       return res.status(503).json({ error: 'Stripe not configured. Contact us at hello@explorex.app to subscribe.', contact: true });
     }
@@ -1170,7 +1170,7 @@ app.post('/api/billing/checkout', authMiddleware, async (req, res) => {
       // server-side and upgrade the plan immediately, so we don't have to rely
       // on the webhook firing in local dev.
       success_url: APP_URL + '/pricing?status=success&session_id={CHECKOUT_SESSION_ID}',
-      cancel_url:  APP_URL + '/pricing?status=cancelled',
+      cancel_url: APP_URL + '/pricing?status=cancelled',
       metadata: { user_id: req.userId, plan },
     });
     res.json({ url: session.url });
@@ -1196,7 +1196,7 @@ app.post('/api/billing/verify', authMiddleware, async (req, res) => {
     }
 
     const plan = session.metadata?.plan;
-    if (!['medium','high'].includes(plan)) return res.status(400).json({ error: 'Invalid plan in session' });
+    if (!['medium', 'high'].includes(plan)) return res.status(400).json({ error: 'Invalid plan in session' });
 
     if (session.payment_status !== 'paid' && session.status !== 'complete') {
       return res.status(409).json({ error: 'Payment not completed yet', payment_status: session.payment_status });
@@ -1285,7 +1285,7 @@ app.post('/api/booking/checkout', authMiddleware, async (req, res) => {
         quantity: 1,
       }],
       success_url: APP_URL + '/bookings?payment=success&booking_id=' + b._id + '&session_id={CHECKOUT_SESSION_ID}',
-      cancel_url:  APP_URL + '/bookings?payment=cancelled&booking_id=' + b._id,
+      cancel_url: APP_URL + '/bookings?payment=cancelled&booking_id=' + b._id,
       metadata: { user_id: req.userId, booking_id: b._id.toString(), kind: 'booking_payment' },
     });
 
@@ -1327,8 +1327,8 @@ app.post('/api/booking/verify', authMiddleware, async (req, res) => {
 
     b.status = 'confirmed';
     b.payment_status = 'paid';
-    b.payment_amount  = (session.amount_total || 0) / 100;
-    b.payment_method  = 'stripe';
+    b.payment_amount = (session.amount_total || 0) / 100;
+    b.payment_method = 'stripe';
     await b.save();
 
     // Award the +25 booking points now that the booking is actually paid for.
@@ -1355,7 +1355,7 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       const userId = session.metadata?.user_id;
-      const plan   = session.metadata?.plan;
+      const plan = session.metadata?.plan;
       if (userId && plan) {
         const until = new Date(); until.setMonth(until.getMonth() + 1);
         await User.findByIdAndUpdate(userId, { $set: { membership: plan, membership_until: until, stripe_subscription_id: session.subscription, trial_active: false } });
@@ -1374,7 +1374,7 @@ app.get('/api/billing/offers', (_req, res) => {
   res.json({
     coupons: [
       { code: 'WELCOME20', label: 'First month 20% off', desc: 'New subscribers' },
-      { code: 'TRYHIGH',   label: 'Try Max plan -30%',  desc: 'Limited promo' },
+      { code: 'TRYHIGH', label: 'Try Max plan -30%', desc: 'Limited promo' },
     ],
     pro: { price: 30, currency: 'AED' },
     max: { price: 65, currency: 'AED' },
@@ -1402,10 +1402,10 @@ Message.create = async function (data) {
 app.get('/api/config/public', (_req, res) => {
   res.json({
     google_client_id: GOOGLE_CLIENT_ID || null,
-    has_stripe:       !!stripe,
-    has_groq:         !!GROQ_API_KEY,
-    has_unsplash:     !!UNSPLASH_ACCESS_KEY,
-    has_weather:      !!OPENWEATHER_API_KEY,
+    has_stripe: !!stripe,
+    has_groq: !!GROQ_API_KEY,
+    has_unsplash: !!UNSPLASH_ACCESS_KEY,
+    has_weather: !!OPENWEATHER_API_KEY,
   });
 });
 
@@ -1419,26 +1419,26 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
     // ("France") rather than a city ("Paris"), since OpenWeatherMap's free
     // /weather endpoint takes city names and 404s on country-only queries.
     const COUNTRY_TO_CAPITAL = {
-      'france':'Paris','japan':'Tokyo','italy':'Rome','spain':'Madrid','germany':'Berlin',
-      'united kingdom':'London','uk':'London','england':'London','greece':'Athens',
-      'usa':'New York','united states':'New York','united states of america':'New York',
-      'india':'New Delhi','china':'Beijing','uae':'Dubai','united arab emirates':'Dubai',
-      'thailand':'Bangkok','vietnam':'Hanoi','indonesia':'Jakarta','singapore':'Singapore',
-      'philippines':'Manila','malaysia':'Kuala Lumpur','south korea':'Seoul','korea':'Seoul',
-      'australia':'Sydney','new zealand':'Auckland','canada':'Toronto','mexico':'Mexico City',
-      'brazil':'Rio de Janeiro','argentina':'Buenos Aires','chile':'Santiago','peru':'Lima',
-      'colombia':'Bogota','venezuela':'Caracas','egypt':'Cairo','morocco':'Marrakech',
-      'south africa':'Cape Town','kenya':'Nairobi','nigeria':'Lagos','turkey':'Istanbul',
-      'russia':'Moscow','ukraine':'Kyiv','poland':'Warsaw','sweden':'Stockholm',
-      'norway':'Oslo','finland':'Helsinki','denmark':'Copenhagen','netherlands':'Amsterdam',
-      'belgium':'Brussels','switzerland':'Zurich','austria':'Vienna','portugal':'Lisbon',
-      'ireland':'Dublin','iceland':'Reykjavik','czech republic':'Prague','hungary':'Budapest',
-      'croatia':'Zagreb','serbia':'Belgrade','romania':'Bucharest','bulgaria':'Sofia',
-      'qatar':'Doha','saudi arabia':'Riyadh','kuwait':'Kuwait City','oman':'Muscat',
-      'bahrain':'Manama','jordan':'Amman','lebanon':'Beirut','israel':'Tel Aviv',
-      'iran':'Tehran','iraq':'Baghdad','pakistan':'Karachi','bangladesh':'Dhaka',
-      'sri lanka':'Colombo','nepal':'Kathmandu','myanmar':'Yangon','cambodia':'Phnom Penh',
-      'laos':'Vientiane','taiwan':'Taipei','hong kong':'Hong Kong',
+      'france': 'Paris', 'japan': 'Tokyo', 'italy': 'Rome', 'spain': 'Madrid', 'germany': 'Berlin',
+      'united kingdom': 'London', 'uk': 'London', 'england': 'London', 'greece': 'Athens',
+      'usa': 'New York', 'united states': 'New York', 'united states of america': 'New York',
+      'india': 'New Delhi', 'china': 'Beijing', 'uae': 'Dubai', 'united arab emirates': 'Dubai',
+      'thailand': 'Bangkok', 'vietnam': 'Hanoi', 'indonesia': 'Jakarta', 'singapore': 'Singapore',
+      'philippines': 'Manila', 'malaysia': 'Kuala Lumpur', 'south korea': 'Seoul', 'korea': 'Seoul',
+      'australia': 'Sydney', 'new zealand': 'Auckland', 'canada': 'Toronto', 'mexico': 'Mexico City',
+      'brazil': 'Rio de Janeiro', 'argentina': 'Buenos Aires', 'chile': 'Santiago', 'peru': 'Lima',
+      'colombia': 'Bogota', 'venezuela': 'Caracas', 'egypt': 'Cairo', 'morocco': 'Marrakech',
+      'south africa': 'Cape Town', 'kenya': 'Nairobi', 'nigeria': 'Lagos', 'turkey': 'Istanbul',
+      'russia': 'Moscow', 'ukraine': 'Kyiv', 'poland': 'Warsaw', 'sweden': 'Stockholm',
+      'norway': 'Oslo', 'finland': 'Helsinki', 'denmark': 'Copenhagen', 'netherlands': 'Amsterdam',
+      'belgium': 'Brussels', 'switzerland': 'Zurich', 'austria': 'Vienna', 'portugal': 'Lisbon',
+      'ireland': 'Dublin', 'iceland': 'Reykjavik', 'czech republic': 'Prague', 'hungary': 'Budapest',
+      'croatia': 'Zagreb', 'serbia': 'Belgrade', 'romania': 'Bucharest', 'bulgaria': 'Sofia',
+      'qatar': 'Doha', 'saudi arabia': 'Riyadh', 'kuwait': 'Kuwait City', 'oman': 'Muscat',
+      'bahrain': 'Manama', 'jordan': 'Amman', 'lebanon': 'Beirut', 'israel': 'Tel Aviv',
+      'iran': 'Tehran', 'iraq': 'Baghdad', 'pakistan': 'Karachi', 'bangladesh': 'Dhaka',
+      'sri lanka': 'Colombo', 'nepal': 'Kathmandu', 'myanmar': 'Yangon', 'cambodia': 'Phnom Penh',
+      'laos': 'Vientiane', 'taiwan': 'Taipei', 'hong kong': 'Hong Kong',
     };
 
     // Build the list of city candidates to try. We try the user's input first;
@@ -1485,21 +1485,21 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
         const forecast = Object.entries(dayMap).slice(0, 3).map(([day, d]) => ({
           day,
           high: Math.round(Math.max(...d.highs)) + '°C',
-          low:  Math.round(Math.min(...d.lows))  + '°C',
+          low: Math.round(Math.min(...d.lows)) + '°C',
           conditions: d.desc,
         }));
 
-        const temp     = Math.round(w.main.temp);
+        const temp = Math.round(w.main.temp);
         const feelsLike = Math.round(w.main.feels_like);
-        const cond     = w.weather[0].main;
-        const humid    = w.main.humidity + '%';
-        const wind     = Math.round(w.wind.speed * 3.6) + ' km/h';
+        const cond = w.weather[0].main;
+        const humid = w.main.humidity + '%';
+        const wind = Math.round(w.wind.speed * 3.6) + ' km/h';
 
         let outfits = ['Comfortable walking shoes'];
-        if (temp < 10)  outfits = ['Heavy coat','Scarf','Warm layers','Boots'];
-        else if (temp < 18) outfits = ['Light jacket','Layered clothing','Comfortable shoes'];
-        else if (temp < 26) outfits = ['Light clothing','Sunglasses','Comfortable footwear'];
-        else outfits = ['Lightweight breathable clothes','Sun hat','Sunscreen','Sunglasses'];
+        if (temp < 10) outfits = ['Heavy coat', 'Scarf', 'Warm layers', 'Boots'];
+        else if (temp < 18) outfits = ['Light jacket', 'Layered clothing', 'Comfortable shoes'];
+        else if (temp < 26) outfits = ['Light clothing', 'Sunglasses', 'Comfortable footwear'];
+        else outfits = ['Lightweight breathable clothes', 'Sun hat', 'Sunscreen', 'Sunglasses'];
         if (/rain|drizzle/i.test(cond)) { outfits.push('Umbrella'); outfits.push('Waterproof jacket'); }
 
         const activities = temp > 20 && !/rain/i.test(cond)
@@ -1511,13 +1511,13 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
           source: used !== rawCity ? 'openweathermap (capital fallback)' : 'openweathermap',
           current: { temperature: temp + '°C', conditions: cond, humidity: humid, wind, feels_like: feelsLike + '°C' },
           forecast: forecast.length ? forecast : [
-            { day: 'Today',    high: (temp + 2) + '°C', low: (temp - 6) + '°C', conditions: cond },
+            { day: 'Today', high: (temp + 2) + '°C', low: (temp - 6) + '°C', conditions: cond },
             { day: 'Tomorrow', high: (temp + 3) + '°C', low: (temp - 5) + '°C', conditions: 'Partly Cloudy' },
             { day: 'Day After', high: (temp - 1) + '°C', low: (temp - 7) + '°C', conditions: 'Sunny' },
           ],
           outfit_suggestions: outfits,
           activity_recommendations: activities,
-          things_to_avoid: temp > 35 ? ['Midday outdoor activities','Dark clothing'] : temp < 5 ? ['Light clothing outdoors','Extended outdoor exposure'] : [],
+          things_to_avoid: temp > 35 ? ['Midday outdoor activities', 'Dark clothing'] : temp < 5 ? ['Light clothing outdoors', 'Extended outdoor exposure'] : [],
         });
       }
     }
@@ -1531,16 +1531,16 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
       city: mockKey || city, requested: rawCity, source: 'mock',
       current: { temperature: t + '°C', conditions: 'Partly Cloudy', humidity: '58%', wind: '12 km/h', feels_like: (t - 2) + '°C' },
       forecast: [
-        { day: 'Today',    high: (t + 2) + '°C', low: (t - 6) + '°C', conditions: 'Partly Cloudy' },
+        { day: 'Today', high: (t + 2) + '°C', low: (t - 6) + '°C', conditions: 'Partly Cloudy' },
         { day: 'Tomorrow', high: (t + 4) + '°C', low: (t - 5) + '°C', conditions: 'Sunny' },
         { day: 'Day After', high: (t - 1) + '°C', low: (t - 8) + '°C', conditions: 'Light Rain' },
       ],
-      outfit_suggestions: t > 28 ? ['Lightweight clothes','Sun hat','Sunscreen','Sunglasses'] : ['Light layers','Comfortable shoes','Light jacket'],
+      outfit_suggestions: t > 28 ? ['Lightweight clothes', 'Sun hat', 'Sunscreen', 'Sunglasses'] : ['Light layers', 'Comfortable shoes', 'Light jacket'],
       activity_recommendations: [
         { activity: 'Outdoor sightseeing', reason: 'Pleasant conditions for walking tours' },
-        { activity: 'Outdoor dining',      reason: 'Great weather for patios' },
+        { activity: 'Outdoor dining', reason: 'Great weather for patios' },
       ],
-      things_to_avoid: t > 35 ? ['Midday sun exposure','Dark clothing'] : [],
+      things_to_avoid: t > 35 ? ['Midday sun exposure', 'Dark clothing'] : [],
     });
   } catch (e) {
     console.error('Weather error:', e.message);
@@ -1550,11 +1550,11 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
       city: req.query.city || 'Unknown', source: 'mock-fallback', error: e.message,
       current: { temperature: '22°C', conditions: 'Partly Cloudy', humidity: '60%', wind: '10 km/h', feels_like: '21°C' },
       forecast: [
-        { day: 'Today',    high: '24°C', low: '18°C', conditions: 'Partly Cloudy' },
+        { day: 'Today', high: '24°C', low: '18°C', conditions: 'Partly Cloudy' },
         { day: 'Tomorrow', high: '26°C', low: '19°C', conditions: 'Sunny' },
         { day: 'Day After', high: '23°C', low: '17°C', conditions: 'Light Rain' },
       ],
-      outfit_suggestions: ['Light layers','Comfortable shoes'],
+      outfit_suggestions: ['Light layers', 'Comfortable shoes'],
       activity_recommendations: [{ activity: 'Sightseeing', reason: 'Mild conditions today' }],
       things_to_avoid: [],
     });
@@ -1564,25 +1564,25 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
 // ─── Entity Routes ────────────────────────────────────────────────────────────
 // Note: Trip and Booking have dedicated handlers above; the remaining entities
 // use the generic CRUD factory.
-app.use('/api/entities/Connection',   entityRouter('Connection'));
-app.use('/api/entities/Itinerary',    entityRouter('Itinerary'));
-app.use('/api/entities/Message',      entityRouter('Message'));
+app.use('/api/entities/Connection', entityRouter('Connection'));
+app.use('/api/entities/Itinerary', entityRouter('Itinerary'));
+app.use('/api/entities/Message', entityRouter('Message'));
 app.use('/api/entities/Notification', entityRouter('Notification'));
-app.use('/api/entities/Place',        entityRouter('Place'));
+app.use('/api/entities/Place', entityRouter('Place'));
 app.use('/api/entities/Subscription', entityRouter('Subscription'));
-app.use('/api/entities/TripInvite',   entityRouter('TripInvite'));
-app.use('/api/entities/Favorite',     entityRouter('Favorite'));
+app.use('/api/entities/TripInvite', entityRouter('TripInvite'));
+app.use('/api/entities/Favorite', entityRouter('Favorite'));
 
 // Booking entity router compat: forward to /api/bookings handlers via mini-router
 const bookingCompat = express.Router();
-bookingCompat.get('/',   authMiddleware, async (req, res) => {
+bookingCompat.get('/', authMiddleware, async (req, res) => {
   try {
     const { sort = '-booking_date', limit = 500, ...filters } = req.query;
     const query = { ...filters };
     Object.keys(query).forEach(k => { if (query[k] === '' || query[k] === undefined) delete query[k]; });
     if (!query.created_by) query.created_by = req.userEmail;
     const sortField = sort.startsWith('-') ? sort.slice(1) : sort;
-    const sortDir   = sort.startsWith('-') ? -1 : 1;
+    const sortDir = sort.startsWith('-') ? -1 : 1;
     const items = await Booking.find(query).sort({ [sortField]: sortDir }).limit(parseInt(limit) || 500).lean();
     res.json(items.map(b => { b.id = b._id.toString(); delete b._id; delete b.__v; return b; }));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -1647,17 +1647,17 @@ app.get('/api/recommendations', authMiddleware, async (req, res) => {
       Favorite.find({ created_by: u.email }).lean(),
     ]);
 
-    const interests   = (u.interests || []).map(s => s.toLowerCase());
+    const interests = (u.interests || []).map(s => s.toLowerCase());
     const favoriteIds = new Set(favorites.map(f => f.place_id));
-    const favCities   = new Set(favorites.map(f => f.city));
-    const favTypes    = new Set(favorites.map(f => f.place_type));
+    const favCities = new Set(favorites.map(f => f.city));
+    const favTypes = new Set(favorites.map(f => f.place_type));
 
     function score(p) {
       let s = 0;
       const text = (p.name + ' ' + (p.description || '') + ' ' + (p.tags || []).join(' ')).toLowerCase();
       interests.forEach(i => { if (i && text.includes(i)) s += 5; });
       if (favCities.has(p.city)) s += 4;
-      if (favTypes.has(p.type))  s += 3;
+      if (favTypes.has(p.type)) s += 3;
       if (u.budget_preference && p.price_level === u.budget_preference) s += 3;
       if (p.featured) s += 2;
       s += (p.rating || 0);
@@ -1685,7 +1685,7 @@ app.post('/api/ai/chat', authMiddleware, requirePlan('medium'), async (req, res)
     const today = todayISO();
     const trip = await Trip.findOne({
       created_by: u.email,
-      status: { $in: ['planned','active'] },
+      status: { $in: ['planned', 'active'] },
       end_date: { $gte: today },
     }).sort({ start_date: 1 });
     let tripContext = '';
@@ -1709,7 +1709,7 @@ app.post('/api/ai/chat', authMiddleware, requirePlan('medium'), async (req, res)
     });
     if (!r.ok) {
       let errBody = '';
-      try { errBody = await r.text(); } catch (_) {}
+      try { errBody = await r.text(); } catch (_) { }
       console.warn('Groq chat error:', r.status, errBody.slice(0, 400));
       // Graceful mock fallback so the user always gets a reply
       const lastUserMsg = (history.slice().reverse().find(m => m.role === 'user') || {}).content || '';
@@ -1765,9 +1765,9 @@ app.get('/api/photos', authMiddleware, async (req, res) => {
     for (let i = 0; i < count; i++) {
       photos.push({
         id: 'src-' + i + '-' + Date.now(),
-        url:   'https://source.unsplash.com/800x600/?' + slug + '&sig=' + (i * 7 + 1),
+        url: 'https://source.unsplash.com/800x600/?' + slug + '&sig=' + (i * 7 + 1),
         thumb: 'https://source.unsplash.com/400x300/?' + slug + '&sig=' + (i * 7 + 1),
-        full:  'https://source.unsplash.com/1600x1000/?' + slug + '&sig=' + (i * 7 + 1),
+        full: 'https://source.unsplash.com/1600x1000/?' + slug + '&sig=' + (i * 7 + 1),
         alt: query, credit: 'Unsplash', credit_url: 'https://unsplash.com',
       });
     }
@@ -1792,7 +1792,7 @@ app.get('/api/photo', authMiddleware, async (req, res) => {
       }
     }
     res.json({
-      url:   'https://source.unsplash.com/800x600/?' + slug,
+      url: 'https://source.unsplash.com/800x600/?' + slug,
       thumb: 'https://source.unsplash.com/400x300/?' + slug,
       alt: query, source: 'source-unsplash',
     });
@@ -1828,20 +1828,20 @@ app.get('/api/country', authMiddleware, async (req, res) => {
 function bestTimeFor(region, subregion) {
   const mapping = {
     'Northern Europe': 'May to September',
-    'Western Europe':  'April to June, September to October',
+    'Western Europe': 'April to June, September to October',
     'Southern Europe': 'April to June, September to October',
-    'Eastern Europe':  'May to September',
-    'Western Asia':    'October to April',
-    'Southern Asia':   'November to March',
+    'Eastern Europe': 'May to September',
+    'Western Asia': 'October to April',
+    'Southern Asia': 'November to March',
     'South-Eastern Asia': 'November to February',
-    'Eastern Asia':    'March to May, September to November',
+    'Eastern Asia': 'March to May, September to November',
     'Northern Africa': 'September to May',
     'Sub-Saharan Africa': 'May to October',
     'Northern America': 'May to October',
-    'Caribbean':       'December to April',
+    'Caribbean': 'December to April',
     'Central America': 'December to April',
-    'South America':   'December to March (south), May to October (tropical)',
-    'Oceania':         'September to March',
+    'South America': 'December to March (south), May to October (tropical)',
+    'Oceania': 'September to March',
   };
   return mapping[subregion] || mapping[region] || 'Year-round';
 }
@@ -1888,7 +1888,7 @@ app.get('/api/country-places', authMiddleware, async (req, res) => {
       const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 1800, temperature: 0.5 }),
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], max_tokens: 3000, temperature: 0.5 }),
       });
       if (r.ok) {
         const data = await r.json();
@@ -1902,7 +1902,7 @@ app.get('/api/country-places', authMiddleware, async (req, res) => {
         // Log the full Groq error body so model decommissions / quota issues
         // are visible in the server logs instead of just a status code.
         let errBody = '';
-        try { errBody = await r.text(); } catch (_) {}
+        try { errBody = await r.text(); } catch (_) { }
         console.warn('Groq country-places error:', r.status, errBody.slice(0, 400));
       }
     }
@@ -2131,7 +2131,7 @@ function fallbackCountryPlaces(country) {
 // ─── Places search (DB first, AI fallback) ───────────────────────────────────
 app.get('/api/places/search', authMiddleware, async (req, res) => {
   try {
-    const q    = (req.query.q    || '').trim();
+    const q = (req.query.q || '').trim();
     const type = (req.query.type || '').trim();
     const limit = Math.min(parseInt(req.query.limit) || 60, 120);
 
@@ -2176,7 +2176,19 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
           const data = await r.json();
           const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
           const clean = text.replace(/```json/g, '').replace(/```/g, '').trim();
-          const parsed = JSON.parse(clean);
+          let parsed;
+          try {
+            parsed = JSON.parse(clean);
+          } catch (jsonErr) {
+            // AI response was cut off — rescue complete items only
+            const lastBracket = clean.lastIndexOf('}');
+            const rescued = clean.slice(0, lastBracket + 1) + ']}';
+            try {
+              parsed = JSON.parse(rescued);
+            } catch (_) {
+              throw jsonErr; // still broken, let outer catch handle it
+            }
+          }
           const aiItems = (parsed.items || []).map((p, i) => ({
             id: 'ai-' + Date.now() + '-' + i, name: p.name, type: p.type || 'attraction', city: p.city || q, country: p.country || '',
             rating: p.rating || 4.5, price_level: p.price_level || 'moderate', avg_price: p.avg_price || 0,
@@ -2195,7 +2207,7 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
           });
         } else {
           let errBody = '';
-          try { errBody = await r.text(); } catch (_) {}
+          try { errBody = await r.text(); } catch (_) { }
           console.warn('Groq places-search error:', r.status, errBody.slice(0, 400));
         }
       } catch (e) { console.warn('places search ai fail', e.message); }
@@ -2210,7 +2222,7 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
 const frontendPublic = path.join(__dirname, '../frontend/public');
 if (fs.existsSync(frontendPublic)) {
   app.use(express.static(frontendPublic, { extensions: ['html'] }));
-  const APP_PAGES = ['home','explore','planner','weather','bookings','connect','chat','profile','notifications','pricing','place','places','favorites'];
+  const APP_PAGES = ['home', 'explore', 'planner', 'weather', 'bookings', 'connect', 'chat', 'profile', 'notifications', 'pricing', 'place', 'places', 'favorites'];
   APP_PAGES.forEach(p => {
     app.get('/' + p, (_req, res) => {
       const file = path.join(frontendPublic, 'app', p + '.html');
