@@ -775,7 +775,10 @@
       };
       if (!tryInit()) {
         const t = setInterval(() => { if (tryInit()) clearInterval(t); }, 120);
-        setTimeout(() => clearInterval(t), 8000);
+        setTimeout(() => clearInterval(t), 30000);
+
+        const gsiScript = document.querySelector('script[src*="accounts.google.com/gsi"]');
+        if (gsiScript) gsiScript.addEventListener('load', () => { if (tryInit()) clearInterval(t); });
       }
     })();
 
