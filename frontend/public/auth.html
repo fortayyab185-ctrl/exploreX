@@ -512,7 +512,7 @@
         <!-- Social — Google Identity Services -->
         <div class="social-row">
           <!-- Hidden GIS widget — used only as the source for sign-in -->
-          <div class="g_id_signin gis-hidden"
+          <div id="gis-widget" class="gis-hidden"
             data-type="standard"
             data-size="large"
             data-theme="outline"
@@ -599,7 +599,7 @@
             callback:  handleGoogleCredential,
           });
           window.google.accounts.id.renderButton(
-            document.querySelector('.g_id_signin'),
+            document.getElementById('gis-widget'),
             { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
           );
           GOOGLE_CONFIGURED = true;
@@ -620,7 +620,7 @@
         showError('Google Sign-In is not yet configured. Add GOOGLE_CLIENT_ID to your .env file.');
         return;
       }
-      const widget = document.querySelector('.g_id_signin');
+      const widget = document.getElementById('gis-widget');
       if (!widget) return;
       // The GIS-rendered widget contains a div with role="button" (or an iframe).
       const clickable = widget.querySelector('[role="button"]') || widget.querySelector('div > div') || widget;
