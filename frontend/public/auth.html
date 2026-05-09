@@ -730,97 +730,95 @@
 
     </div>
   </div>
-
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script>
-  let GOOGLE_CLIENT_ID_VALUE = '';
-  let GOOGLE_CONFIGURED = false;
+  <script>
+    let GOOGLE_CLIENT_ID_VALUE = '';
+    let GOOGLE_CONFIGURED = false;
 
-  async function initGoogle() {
-    // Wait for config fetch AND GSI script load at the same time
-    const [configResult, gsiResult] = await Promise.allSettled([
+    async function initGoogle() {
+      // Wait for config fetch AND GSI script load at the same time
+      const [configResult, gsiResult] = await Promise.allSettled([
 
-      // 1. Fetch the client ID from your backend
-      fetch('/api/config/public')
-        .then(r => r.json())
-        .then(d => d.google_client_id || ''),
+        // 1. Fetch the client ID from your backend
+        fetch('/api/config/public')
+          .then(r => r.json())
+          .then(d => d.google_client_id || ''),
 
-      // 2. Wait for the GSI script to actually finish loading
-      new Promise((resolve, reject) => {
-        if (window.google?.accounts?.id) { resolve(); return; }
-        const script = document.querySelector('script[src*="accounts.google.com/gsi"]');
-        if (!script) { reject(new Error('GSI script tag not found')); return; }
-        script.addEventListener('load', resolve);
-        script.addEventListener('error', () => reject(new Error('GSI script failed to load')));
-        setTimeout(() => reject(new Error('GSI load timed out')), 20000);
-      })
+        // 2. Wait for the GSI script to actually finish loading
+        new Promise((resolve, reject) => {
+          if (window.google?.accounts?.id) { resolve(); return; }
+          const script = document.querySelector('script[src*="accounts.google.com/gsi"]');
+          if (!script) { reject(new Error('GSI script tag not found')); return; }
+          script.addEventListener('load', resolve);
+          script.addEventListener('error', () => reject(new Error('GSI script failed to load')));
+          setTimeout(() => reject(new Error('GSI load timed out')), 20000);
+        })
 
-    ]);
+      ]);
 
-    if (configResult.status === 'rejected' || !configResult.value) {
-      console.warn('Could not get Google client ID:', configResult.reason);
-      return;
+      if (configResult.status === 'rejected' || !configResult.value) {
+        console.warn('Could not get Google client ID:', configResult.reason);
+        return;
+      }
+      if (gsiResult.status === 'rejected') {
+        console.warn('GSI script did not load:', gsiResult.reason);
+        return;
+      }
+
+      GOOGLE_CLIENT_ID_VALUE = configResult.value;
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID_VALUE,
+          callback: handleGoogleCredential,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('gis-widget'),
+          { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
+        );
+        GOOGLE_CONFIGURED = true;
+        console.log('Google Sign-In ready');
+      } catch (e) {
+        console.error('GSI initialize/renderButton failed:', e);
+      }
     }
-    if (gsiResult.status === 'rejected') {
-      console.warn('GSI script did not load:', gsiResult.reason);
-      return;
+
+    initGoogle();
+
+    function triggerGoogleSignIn() {
+      if (!GOOGLE_CONFIGURED) {
+        showError('Google Sign-In is still loading, please try again in a moment.');
+        return;
+      }
+      const widget = document.getElementById('gis-widget');
+      if (!widget) return;
+      const clickable = widget.querySelector('iframe')
+        || widget.querySelector('[role="button"]')
+        || widget;
+      if (clickable) clickable.click();
     }
 
-    GOOGLE_CLIENT_ID_VALUE = configResult.value;
-
-    try {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID_VALUE,
-        callback: handleGoogleCredential,
-      });
-      window.google.accounts.id.renderButton(
-        document.getElementById('gis-widget'),
-        { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
-      );
-      GOOGLE_CONFIGURED = true;
-      console.log('Google Sign-In ready');
-    } catch (e) {
-      console.error('GSI initialize/renderButton failed:', e);
+    async function handleGoogleCredential(response) {
+      const btn = document.getElementById('googleSignInBtn');
+      const originalText = btn ? btn.textContent : '';
+      if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
+      try {
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+        localStorage.setItem('explorex_token', data.token);
+        localStorage.setItem('explorex_user', JSON.stringify(data.user));
+        window.location.href = '/home';
+      } catch (err) {
+        if (btn) { btn.textContent = originalText; btn.disabled = false; }
+        showError(err.message);
+      }
     }
-  }
-
-  initGoogle();
-
-  function triggerGoogleSignIn() {
-    if (!GOOGLE_CONFIGURED) {
-      showError('Google Sign-In is still loading, please try again in a moment.');
-      return;
-    }
-    const widget = document.getElementById('gis-widget');
-    if (!widget) return;
-    const clickable = widget.querySelector('iframe')
-      || widget.querySelector('[role="button"]')
-      || widget;
-    if (clickable) clickable.click();
-  }
-
-  async function handleGoogleCredential(response) {
-    const btn = document.getElementById('googleSignInBtn');
-    const originalText = btn ? btn.textContent : '';
-    if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
-    try {
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
-      localStorage.setItem('explorex_token', data.token);
-      localStorage.setItem('explorex_user', JSON.stringify(data.user));
-      window.location.href = '/home';
-    } catch (err) {
-      if (btn) { btn.textContent = originalText; btn.disabled = false; }
-      showError(err.message);
-    }
-  }
-</script>
+  </script>
 </body>
 
 </html>
