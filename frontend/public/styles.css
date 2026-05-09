@@ -1058,3 +1058,245 @@ footer {
 #journey-features .bg-stone-50,
 #journey-features .bg-stone-100 { background: var(--background) !important; }
 #journey-features img.parallax-bg { opacity: 0.18 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Breakpoint ≤ 768px
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Hamburger nav menu ─────────────────────────────────────── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  order: 3;
+  transition: background 0.2s;
+}
+.nav-hamburger:hover { background: var(--hover-bg); }
+.nav-hamburger span {
+  display: block;
+  width: 20px; height: 2px;
+  background: var(--text-1);
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.nav-mobile-menu {
+  display: none;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: 0 8px 24px rgba(26,46,46,0.08);
+  padding: 1.25rem 1.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 29;
+}
+.nav-mobile-menu.open { display: flex; }
+.nav-mobile-menu .btn-nav-login,
+.nav-mobile-menu .btn-nav-signup {
+  width: 100%;
+  padding: 0.85rem 1.3rem;
+  font-size: 0.9rem;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  /* Show hamburger, hide desktop nav actions */
+  .nav-hamburger { display: flex; }
+  .hero-nav-actions { display: none; }
+
+  /* ── Hero ─────────────────────────────────────────────── */
+  #hero {
+    padding-top: 80px;
+    padding-bottom: 3rem;
+  }
+
+  .hero-grid {
+    gap: 2rem;
+  }
+
+  .hero-headline {
+    font-size: clamp(2rem, 8.5vw, 2.8rem) !important;
+  }
+
+  .hero-sub {
+    font-size: 0.92rem;
+    max-width: 100%;
+  }
+
+  .plane-window {
+    width: min(85%, 320px) !important;
+    max-height: 55vh !important;
+  }
+
+  /* ── About ────────────────────────────────────────────── */
+  .about {
+    padding: 4rem var(--side-pad-mobile);
+  }
+
+  .about-grid {
+    gap: 2.5rem;
+  }
+
+  .about-stats {
+    gap: 1.25rem;
+  }
+
+  /* ── Journey Features — DISABLE STICKY SCROLL ON MOBILE ── */
+
+  /* 1. Reset the 300vh section height to auto */
+  #journey-features {
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  /* 2. Remove sticky positioning */
+  #journey-features .journey-sticky-wrap {
+    position: relative !important;
+    height: auto !important;
+    overflow: visible !important;
+    top: auto !important;
+  }
+
+  /* 3. Content wrapper: auto height, column flex */
+  #journey-features .journey-content-wrap {
+    height: auto !important;
+    min-height: unset !important;
+    flex-direction: column !important;
+    padding: 2rem 1rem !important;
+    gap: 2rem;
+  }
+
+  /* 4. Left column: auto height, no flex centering needed */
+  #journey-features .journey-left-col {
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* 5. The section header was absolutely positioned — make it relative */
+  #journey-features .journey-section-header {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  /* 6. Cards container: auto height, column, all visible */
+  #journey-features .journey-cards-container {
+    position: relative !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
+    gap: 1rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+  }
+
+  /* 7. Hide the progress SVG */
+  #journey-features .journey-progress-svg {
+    display: none !important;
+  }
+
+  /* 8. All journey card-inners: fully visible, no fade/scale */
+  .journey-card .card-inner {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+
+  /* 9. Journey dots: all styled same (active) */
+  .journey-dot {
+    background: white !important;
+    box-shadow: 0 0 0 3px rgba(110,173,173,0.18) !important;
+    border-color: #6EADAD !important;
+  }
+
+  /* 10. Journey card layout: push dot left less on mobile */
+  .journey-card {
+    margin-top: 0 !important;
+  }
+
+ /* 11. Right column (Problem/Solution panel): hide completely on mobile */
+#journey-features .journey-right-col {
+    display: none !important;
+}
+
+  /* 15. Hide the drag handle */
+  #split-handle {
+    display: none !important;
+  }
+
+  /* ── Pricing ──────────────────────────────────────────── */
+  .pricing {
+    padding: 4rem var(--side-pad-mobile);
+  }
+
+  .pricing-grid {
+    gap: 1.25rem;
+  }
+
+  .pricing-card-featured {
+    transform: translateY(0);
+    order: -1;
+  }
+
+  /* ── Contact ──────────────────────────────────────────── */
+  .contact {
+    padding: 4rem var(--side-pad-mobile);
+  }
+
+  .contact-grid {
+    gap: 2rem;
+  }
+
+  /* ── Footer ────────────────────────────────────────────── */
+  .footer-links {
+    gap: 1.25rem;
+  }
+
+  /* ── Scroll-reveal: don't let sections overflow ────────── */
+  .hidden-reveal {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-headline {
+    font-size: clamp(1.8rem, 7.5vw, 2.4rem) !important;
+  }
+
+  .plane-window {
+    width: min(90%, 280px) !important;
+    max-height: 50vh !important;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .about-stat-value {
+    font-size: 1.4rem !important;
+  }
+
+  #split-container {
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  .pricing-card {
+    padding: 1.75rem 1.5rem;
+  }
+}

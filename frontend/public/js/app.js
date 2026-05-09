@@ -252,7 +252,7 @@
     nav += '</div><div class="profile-menu-foot"><button id="logout-btn">Log out</button></div></div></div>';
     nav += '<button class="mobile-toggle" id="mobile-toggle" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button></div></div></nav>';
     nav += '<div class="mobile-drawer hidden" id="mobile-drawer">';
-    [].concat(MAIN_NAV, PROFILE_MENU).forEach(n => { nav += '<a href="' + n.path + '" class="' + (cur === n.path ? 'active' : '') + '">' + n.label + '</a>'; });
+MAIN_NAV.forEach(n => { nav += '<a href="' + n.path + '" class="' + (cur === n.path ? 'active' : '') + '">' + n.label + '</a>'; });
     nav += '</div>';
 
     const slot = document.getElementById('app-nav-slot');

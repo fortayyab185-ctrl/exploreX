@@ -166,6 +166,7 @@ revealEls.forEach(el => observer.observe(el));
 
   window.addEventListener('scroll', function() {
     if (!journeySection) return;
+    if (window.innerWidth <= 768) return; /* Skip journey animation on mobile */
     var rect = journeySection.getBoundingClientRect();
     if (rect.bottom < 0 || rect.top > window.innerHeight) return;
 
@@ -222,7 +223,7 @@ revealEls.forEach(el => observer.observe(el));
   var clipLayers     = document.querySelectorAll('.clip-layer');
   var isDraggingSplit = false;
 
-  if (splitContainer) {
+  if (splitContainer && window.innerWidth > 768) {
     splitContainer.addEventListener('mousedown',  function() { isDraggingSplit = true;  document.body.style.userSelect = 'none'; });
     splitContainer.addEventListener('touchstart', function() { isDraggingSplit = true;  document.body.style.userSelect = 'none'; }, { passive: true });
     window.addEventListener('mouseup',  function() { isDraggingSplit = false; document.body.style.userSelect = 'auto'; });

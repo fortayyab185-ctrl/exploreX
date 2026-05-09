@@ -75,7 +75,14 @@
         <img src="logo.png" alt="ExploreX Logo" class="hero-logo-img" />
         <span class="hero-logo-text"><span class="bx-e">explore</span><span class="bx-x">X</span></span>
       </a>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Menu" onclick="document.getElementById('navMobileMenu').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
       <div class="hero-nav-actions">
+        <button class="btn-nav-login" onclick="window.location.href='auth.html?mode=login'">Log in</button>
+        <button class="btn-nav-signup" onclick="window.location.href='auth.html'">Sign up</button>
+      </div>
+      <div class="nav-mobile-menu" id="navMobileMenu">
         <button class="btn-nav-login" onclick="window.location.href='auth.html?mode=login'">Log in</button>
         <button class="btn-nav-signup" onclick="window.location.href='auth.html'">Sign up</button>
       </div>
@@ -164,18 +171,18 @@
 
 <!-- ═══ IMMERSIVE JOURNEY FEATURES SECTION ════════════════════ -->
 <section id="journey-features" class="relative h-[300vh]">
-    <div class="sticky top-0 h-screen w-full overflow-hidden">
+    <div class="sticky top-0 h-screen w-full overflow-hidden journey-sticky-wrap">
         <div class="absolute inset-0 z-0"></div>
 
-        <div class="relative z-10 h-full max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col md:flex-row">
+        <div class="relative z-10 h-full max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col md:flex-row journey-content-wrap">
 
-        <div class="relative w-full md:w-5/12 h-1/2 md:h-full p-8 md:p-16 flex items-center">
-            <div class="absolute top-6 left-6 md:top-10 md:left-14 z-10">
+        <div class="relative w-full md:w-5/12 h-1/2 md:h-full p-8 md:p-16 flex items-center journey-left-col">
+            <div class="absolute top-6 left-6 md:top-10 md:left-14 z-10 journey-section-header">
               <p style="font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:.55rem;">Our Features</p>
               <h2 style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(1.5rem,2.6vw,2.25rem);color:var(--text-1);letter-spacing:-0.02em;line-height:1.1;white-space:nowrap;">The Journey <span style="color:var(--teal-700);">Experience</span></h2>
             </div>
-            <div class="relative w-full h-full max-h-[600px] flex flex-col justify-between py-12">
-                <svg class="absolute left-6 md:left-8 top-0 h-full w-24 -z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <div class="relative w-full h-full max-h-[600px] flex flex-col justify-between py-12 journey-cards-container">
+                <svg class="absolute left-6 md:left-8 top-0 h-full w-24 -z-10 journey-progress-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <path d="M 20 0 C 80 33, -40 66, 20 100" fill="none" stroke="rgba(110,173,173,0.2)" stroke-width="1.2"></path>
                     <path id="journey-progress-path" d="M 20 0 C 80 33, -40 66, 20 100" fill="none" stroke="#6EADAD" stroke-width="2" stroke-dasharray="100" stroke-dashoffset="100" class="transition-all duration-75 ease-linear"></path>
                 </svg>
@@ -221,7 +228,7 @@
             </div>
         </div>
 
-        <div class="relative w-full md:w-7/12 h-1/2 md:h-full p-6 md:p-12 flex items-center justify-center">
+        <div class="relative w-full md:w-7/12 h-1/2 md:h-full p-6 md:p-12 flex items-center justify-center journey-right-col">
             <div id="split-container" class="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden cursor-ew-resize select-none" style="border:1px solid #E4EDED; box-shadow: 0 32px 64px rgba(26,46,46,0.10);">
 
                 <div class="split-set absolute inset-0 transition-opacity duration-1000 opacity-100" style="pointer-events: auto;">
