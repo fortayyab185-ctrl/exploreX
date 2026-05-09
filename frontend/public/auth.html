@@ -780,18 +780,21 @@
 
     // Forward a click on our styled button to the real GIS widget so the
     // sign-in flow uses Google's iframe but the visible UI is our 12px-radius button.
-    function triggerGoogleSignIn() {
-      if (!GOOGLE_CONFIGURED) {
-        showError('Google Sign-In is not yet configured. Add GOOGLE_CLIENT_ID to your .env file.');
-        return;
-      }
-      const widget = document.getElementById('gis-widget');
-      if (!widget) return;
-      // The GIS-rendered widget contains a div with role="button" (or an iframe).
-      const clickable = widget.querySelector('[role="button"]') || widget.querySelector('div > div') || widget;
-      if (clickable && clickable.click) clickable.click();
+function triggerGoogleSignIn() {
+  if (!GOOGLE_CONFIGURED) {
+    showError('Google Sign-In is not configured. Please try again in a moment.');
+    return;
+  }
+  window.google.accounts.id.prompt(function(notification) {
+    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      // One Tap was suppressed (incognito, browser setting, or dismissed before)
+      // Fall back to showing the error so user knows something happened
+      const reason = notification.getNotDisplayedReason?.() || notification.getSkippedReason?.() || 'unknown';
+      console.warn('Google One Tap suppressed:', reason);
+      showError('Google Sign-In was blocked by your browser. Try disabling ad blockers or use email sign-in.');
     }
-
+  });
+}
     async function handleGoogleCredential(response) {
       const btn = document.getElementById('submitBtn');
       const originalText = btn ? btn.textContent : '';
