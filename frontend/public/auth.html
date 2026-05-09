@@ -251,13 +251,13 @@
     /* Hide the real Google Identity Services widget — kept in DOM so the
        library can render & dispatch credentials. We forward clicks from
        our pretty styled button to the widget's internal element. */
-    .gis-hidden {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
+    #gis-widget {
+      position: fixed !important;
+      left: -500px !important;
+      top: 0 !important;
+      width: 400px !important;
+      height: 60px !important;
       overflow: hidden !important;
-      clip: rect(0 0 0 0) !important;
-      pointer-events: none !important;
       opacity: 0 !important;
     }
 
@@ -669,7 +669,7 @@
         <!-- Social — Google Identity Services -->
         <div class="social-row">
           <!-- Hidden GIS widget — used only as the source for sign-in -->
-
+          <div id="gis-widget"></div>
           <!-- Our pretty button — radius matches everything else -->
           <button type="button" class="social-btn google-btn" id="googleSignInBtn" onclick="triggerGoogleSignIn()">
             <svg viewBox="0 0 24 24" style="width:1.15rem;height:1.15rem;flex-shrink:0">
@@ -761,12 +761,14 @@
             window.google.accounts.id.initialize({
               client_id: GOOGLE_CLIENT_ID_VALUE,
               callback: handleGoogleCredential,
-              auto_select: false,
-              cancel_on_tap_outside: true,
             });
+            window.google.accounts.id.renderButton(
+              document.getElementById('gis-widget'),
+              { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
+            );
             GOOGLE_CONFIGURED = true;
           } catch (e) {
-            console.error('GSI initialize failed:', e);
+            console.error('GSI init error:', e);
           }
           return GOOGLE_CONFIGURED;
         }
@@ -780,21 +782,19 @@
 
     // Forward a click on our styled button to the real GIS widget so the
     // sign-in flow uses Google's iframe but the visible UI is our 12px-radius button.
-function triggerGoogleSignIn() {
-  if (!GOOGLE_CONFIGURED) {
-    showError('Google Sign-In is not configured. Please try again in a moment.');
-    return;
-  }
-  window.google.accounts.id.prompt(function(notification) {
-    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-      // One Tap was suppressed (incognito, browser setting, or dismissed before)
-      // Fall back to showing the error so user knows something happened
-      const reason = notification.getNotDisplayedReason?.() || notification.getSkippedReason?.() || 'unknown';
-      console.warn('Google One Tap suppressed:', reason);
-      showError('Google Sign-In was blocked by your browser. Try disabling ad blockers or use email sign-in.');
+    function triggerGoogleSignIn() {
+      if (!GOOGLE_CONFIGURED) {
+        showError('Google Sign-In is still loading, please try again in a moment.');
+        return;
+      }
+      const widget = document.getElementById('gis-widget');
+      if (!widget) return;
+      // renderButton creates an iframe — click the iframe directly
+      const clickable = widget.querySelector('iframe')
+        || widget.querySelector('[role="button"]')
+        || widget;
+      if (clickable) clickable.click();
     }
-  });
-}
     async function handleGoogleCredential(response) {
       const btn = document.getElementById('submitBtn');
       const originalText = btn ? btn.textContent : '';
