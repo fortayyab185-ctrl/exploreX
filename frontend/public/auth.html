@@ -251,7 +251,7 @@
     /* Hide the real Google Identity Services widget — kept in DOM so the
        library can render & dispatch credentials. We forward clicks from
        our pretty styled button to the widget's internal element. */
-    #gis-widget {
+    .gis-hidden {
       position: fixed !important;
       left: -500px !important;
       top: 0 !important;
@@ -669,7 +669,10 @@
         <!-- Social — Google Identity Services -->
         <div class="social-row">
           <!-- Hidden GIS widget — used only as the source for sign-in -->
-          <div id="gis-widget"></div>
+
+          <div class="gis-hidden" id="gis-widget" data-type="standard" data-size="large" data-theme="outline"
+            data-text="continue_with" data-shape="rectangular" data-width="360" data-logo_alignment="left">
+          </div>
           <!-- Our pretty button — radius matches everything else -->
           <button type="button" class="social-btn google-btn" id="googleSignInBtn" onclick="triggerGoogleSignIn()">
             <svg viewBox="0 0 24 24" style="width:1.15rem;height:1.15rem;flex-shrink:0">
@@ -730,76 +733,67 @@
 
     </div>
   </div>
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
+    // ── Config — fetched from backend ─────────────────────────────────────────
     let GOOGLE_CLIENT_ID_VALUE = '';
     let GOOGLE_CONFIGURED = false;
 
-    async function initGoogle() {
-      // Wait for config fetch AND GSI script load at the same time
-      const [configResult, gsiResult] = await Promise.allSettled([
-
-        // 1. Fetch the client ID from your backend
-        fetch('/api/config/public')
-          .then(r => r.json())
-          .then(d => d.google_client_id || ''),
-
-        // 2. Wait for the GSI script to actually finish loading
-        new Promise((resolve, reject) => {
-          if (window.google?.accounts?.id) { resolve(); return; }
-          const script = document.querySelector('script[src*="accounts.google.com/gsi"]');
-          if (!script) { reject(new Error('GSI script tag not found')); return; }
-          script.addEventListener('load', resolve);
-          script.addEventListener('error', () => reject(new Error('GSI script failed to load')));
-          setTimeout(() => reject(new Error('GSI load timed out')), 20000);
-        })
-
-      ]);
-
-      if (configResult.status === 'rejected' || !configResult.value) {
-        console.warn('Could not get Google client ID:', configResult.reason);
-        return;
-      }
-      if (gsiResult.status === 'rejected') {
-        console.warn('GSI script did not load:', gsiResult.reason);
-        return;
-      }
-
-      GOOGLE_CLIENT_ID_VALUE = configResult.value;
-
+    (async function initGoogle() {
       try {
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID_VALUE,
-          callback: handleGoogleCredential,
-        });
-        window.google.accounts.id.renderButton(
-          document.getElementById('gis-widget'),
-          { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
-        );
-        GOOGLE_CONFIGURED = true;
-        console.log('Google Sign-In ready');
+        const res = await fetch('/api/config/public');
+        const data = await res.json();
+        GOOGLE_CLIENT_ID_VALUE = data.google_client_id || '';
       } catch (e) {
-        console.error('GSI initialize/renderButton failed:', e);
+        console.warn('Could not fetch public config:', e.message);
       }
-    }
 
-    initGoogle();
+      if (!GOOGLE_CLIENT_ID_VALUE) {
+        // No Google client — keep our button visible; clicks show a helpful error.
+        GOOGLE_CONFIGURED = false;
+        return;
+      }
 
+
+      // Wait for the GIS library to be ready, then render the widget into
+      // the hidden container.
+      const tryInit = () => {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID_VALUE,
+            callback: handleGoogleCredential,
+          });
+          window.google.accounts.id.renderButton(
+            document.getElementById('gis-widget'),
+            { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with', width: 360 }
+          );
+          GOOGLE_CONFIGURED = true;
+          return true;
+        }
+        return false;
+      };
+      if (!tryInit()) {
+        const t = setInterval(() => { if (tryInit()) clearInterval(t); }, 120);
+        setTimeout(() => clearInterval(t), 8000);
+      }
+    })();
+
+    // Forward a click on our styled button to the real GIS widget so the
+    // sign-in flow uses Google's iframe but the visible UI is our 12px-radius button.
     function triggerGoogleSignIn() {
       if (!GOOGLE_CONFIGURED) {
-        showError('Google Sign-In is still loading, please try again in a moment.');
+        showError('Google Sign-In is not yet configured. Add GOOGLE_CLIENT_ID to your .env file.');
         return;
       }
       const widget = document.getElementById('gis-widget');
       if (!widget) return;
-      const clickable = widget.querySelector('iframe')
-        || widget.querySelector('[role="button"]')
-        || widget;
-      if (clickable) clickable.click();
+      const clickable = widget.querySelector('iframe') || widget.querySelector('[role="button"]') || widget;
+      if (clickable && clickable.click) clickable.click();
     }
 
     async function handleGoogleCredential(response) {
-      const btn = document.getElementById('googleSignInBtn');
+      const btn = document.getElementById('submitBtn');
       const originalText = btn ? btn.textContent : '';
       if (btn) { btn.textContent = 'Signing in…'; btn.disabled = true; }
       try {
@@ -816,6 +810,107 @@
       } catch (err) {
         if (btn) { btn.textContent = originalText; btn.disabled = false; }
         showError(err.message);
+      }
+    }
+
+    function handleGoogleAuth() {
+      showError('Google Sign-In is not yet configured. Add GOOGLE_CLIENT_ID to your .env file.');
+    }
+
+    // ── Login / Signup toggle ─────────────────────────────────────────────────
+    let isLogin = false;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('mode') === 'login') { isLogin = false; toggleMode(true); }
+
+    function toggleMode(force) {
+      if (force !== undefined) isLogin = !force;
+      isLogin = !isLogin;
+      const card = document.getElementById('authCard');
+      const loginHeading = document.getElementById('loginHeading');
+      const signupHeading = document.getElementById('signupHeading');
+      const formSub = document.getElementById('formSub');
+      const submitBtn = document.getElementById('submitBtn');
+      const toggleLine = document.getElementById('toggleLine');
+      const signupOnlyEls = document.querySelectorAll('.signup-only');
+
+      if (isLogin) {
+        card.classList.add('login-mode');
+        loginHeading.style.display = 'block';
+        signupHeading.style.display = 'none';
+        formSub.textContent = 'Pick up where you left off — your trips, places, and plans.';
+        submitBtn.textContent = 'Log in';
+        toggleLine.innerHTML = "Don't have an account? <a onclick='toggleMode()'>Sign up</a>";
+        signupOnlyEls.forEach(el => el.style.display = 'none');
+      } else {
+        card.classList.remove('login-mode');
+        loginHeading.style.display = 'none';
+        signupHeading.style.display = 'block';
+        formSub.textContent = 'Discover destinations, plan your trips with AI, and find your travel tribe.';
+        submitBtn.textContent = 'Start exploring';
+        toggleLine.innerHTML = "Already have an account? <a onclick='toggleMode()'>Log in</a>";
+        signupOnlyEls.forEach(el => el.style.display = 'block');
+      }
+    }
+
+    // ── Form submit ───────────────────────────────────────────────────────────
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Loading…';
+      btn.disabled = true;
+
+      const email = document.querySelector('input[type="email"]').value.trim();
+      const password = document.getElementById('pwdInput').value;
+      const nameEl = document.querySelector('.signup-only input[type="text"]');
+      const fullName = nameEl ? nameEl.value.trim() : '';
+
+      try {
+        const endpoint = isLogin ? '/api/auth/signin' : '/api/auth/signup';
+        const body = isLogin ? { email, password } : { email, password, full_name: fullName };
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        localStorage.setItem('explorex_token', data.token);
+        localStorage.setItem('explorex_user', JSON.stringify(data.user));
+        window.location.href = '/home';
+      } catch (err) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        showError(err.message);
+      }
+    }
+
+    function showError(msg) {
+      let errEl = document.getElementById('auth-error');
+      if (!errEl) {
+        errEl = document.createElement('p');
+        errEl.id = 'auth-error';
+        document.getElementById('authForm').appendChild(errEl);
+      }
+      errEl.textContent = msg;
+    }
+
+    // ── Password toggle ───────────────────────────────────────────────────────
+    function togglePwd() {
+      const input = document.getElementById('pwdInput');
+      const icon = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML =
+          '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>' +
+          '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>' +
+          '<line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        input.type = 'password';
+        icon.innerHTML =
+          '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>' +
+          '<circle cx="12" cy="12" r="3"/>';
       }
     }
   </script>
