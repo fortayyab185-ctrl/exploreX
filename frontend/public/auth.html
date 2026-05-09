@@ -512,11 +512,6 @@
         <!-- Social — Google Identity Services -->
         <div class="social-row">
           <!-- Hidden GIS widget — used only as the source for sign-in -->
-          <div id="g_id_onload"
-            data-client_id=""
-            data-callback="handleGoogleCredential"
-            data-auto_prompt="false">
-          </div>
           <div class="g_id_signin gis-hidden"
             data-type="standard"
             data-size="large"
@@ -594,8 +589,6 @@
         return;
       }
 
-      const onload = document.getElementById('g_id_onload');
-      if (onload) onload.dataset.clientId = GOOGLE_CLIENT_ID_VALUE;
 
       // Wait for the GIS library to be ready, then render the widget into
       // the hidden container.
