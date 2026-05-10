@@ -1,10 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /bookings — Trip-based booking system
-   Tabs: Upcoming Trips | Past Trips | All Bookings
-   - Create trip (destination, dates, travelers, budget) with date-conflict check
-   - View trip details (expand list of bookings within that trip)
-   - Cancel trip (confirmation modal, soft-cancels child bookings)
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -21,8 +16,8 @@
     }));
     document.getElementById('new-trip-btn').addEventListener('click', () => openNewTripModal());
 
-    // Handle redirect from Stripe Checkout (booking payment).
-    // ?payment=success&booking_id=…&session_id=… → verify server-side and confirm.
+    
+    
     const params = new URLSearchParams(location.search);
     if (params.get('payment') === 'success' && params.get('session_id')) {
       const verifyToast = toast.loading('Verifying your payment…', { title: 'Almost done' });
@@ -47,8 +42,8 @@
         });
       }
       history.replaceState({}, '', '/bookings');
-      // After verify, switch to "All Bookings" so the user actually sees the new booking,
-      // even if it has no trip attached.
+      
+      
       bucket = 'all-bookings';
       document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.bucket === 'all-bookings'));
     } else if (params.get('payment') === 'cancelled') {
@@ -62,7 +57,7 @@
 
     await reload();
 
-    // If launched with ?new=1 (e.g. from globe), open the New Trip modal
+    
     if (params.get('new') === '1') {
       openNewTripModal({ destination_country: params.get('country') || '' });
     }
@@ -94,9 +89,9 @@
     else                       trips = trips.filter(t =>  isPastTrip(t));
     trips.sort((a, b) => (a.start_date || '').localeCompare(b.start_date || '') * (bucket === 'upcoming' ? 1 : -1));
 
-    // Standalone bookings = bookings without a trip. Show them on the Upcoming
-    // tab so the user can see what they booked from /places without first
-    // creating a trip — otherwise they'd appear nowhere on this default tab.
+    
+    
+    
     const today = new Date().toISOString().slice(0, 10);
     const standaloneFilter = bucket === 'upcoming'
       ? (b => !b.trip_id && b.status !== 'cancelled' && (b.booking_date || '') >= today)
@@ -149,7 +144,7 @@
     bindStandaloneActions(out);
   }
 
-  // Standalone booking row (rendered both on the trips tabs and the All Bookings tab).
+  
   function standaloneBookingHTML(b) {
     const isUnpaidPending = b.status === 'pending' && b.payment_status !== 'paid' && (b.total_price || 0) > 0;
     const isFinished = b.status === 'cancelled' || b.status === 'completed';
@@ -175,7 +170,7 @@
     '</div>';
   }
 
-  // Render a booking image with a graceful fallback to the ExploreX logo.
+  
   function bookingImageHtml(b) {
     const fallback = '/logo.png';
     if (b.place_image) {
@@ -184,9 +179,9 @@
     return '<img src="' + fallback + '" alt="' + escapeHtml(b.place_name || '') + '" class="img-logo-fallback">';
   }
 
-  // Wire pay/cancel/delete buttons on booking rows + apply image fallback.
+  
   function bindStandaloneActions(out) {
-    // Image error fallback — swap to logo if Unsplash etc. fails to load.
+    
     out.querySelectorAll('img[data-fallback="logo"]').forEach(img => {
       img.addEventListener('error', () => {
         if (img.dataset.fallbackApplied) return;
@@ -258,8 +253,8 @@
         '<div class="actions">' +
           '<button class="btn btn-outline" data-act="details">View details</button>' +
           (t.status !== 'cancelled' ? '<a class="btn btn-outline" href="/places?q=' + encodeURIComponent(t.destination_city || t.destination_country) + '">Add bookings</a>' : '') +
-          // For active/upcoming trips: soft-cancel.
-          // For already-cancelled / completed / past trips: permanently delete.
+          
+          
           (t.status === 'cancelled' || past
             ? '<button class="btn btn-ghost" data-act="delete" style="color:var(--destructive)">Delete</button>'
             : '<button class="btn btn-ghost" data-act="cancel" style="color:var(--destructive)">Cancel trip</button>') +
@@ -269,7 +264,7 @@
     '</div>';
   }
 
-  // Lazily load a cover photo for trips that lack one
+  
   function ensureCoverPhotos() {
     document.querySelectorAll('[data-cover]').forEach(async img => {
       if (img.src) return;
@@ -279,12 +274,12 @@
       try {
         const res = await window.db.integrations.photo((t.destination_city || '') + ' ' + t.destination_country);
         if (res && (res.url || res.thumb)) img.src = res.url || res.thumb;
-      } catch (e) { /* ignore */ }
+      } catch (e) {  }
     });
   }
-  // Run after each render
+  
   const _origRender = render;
-  // (Hook into the real render by overriding the var name, simpler: just call after innerHTML set)
+  
 
   function toggleDetails(cardEl, trip) {
     const slot = cardEl.querySelector('.trip-details-slot');
@@ -348,8 +343,8 @@
     } catch (e) { toast.error(e.message, { title: 'Could not cancel' }); }
   }
 
-  // Permanent delete — used for past or already-cancelled trips. Removes the
-  // trip and ALL of its child bookings from the database. Cannot be undone.
+  
+  
   async function deleteTrip(trip) {
     const ok = await window.confirmModal({
       title: 'Delete this trip permanently?',
@@ -397,7 +392,7 @@
     bindStandaloneActions(out);
   }
 
-  /* ── New Trip modal ─────────────────────────────────────────────────────── */
+  
   function openNewTripModal(prefill) {
     prefill = prefill || {};
     const today = new Date().toISOString().slice(0, 10);
@@ -453,12 +448,12 @@
       const btn = m.root.querySelector('#t-create');
       btn.disabled = true; btn.textContent = 'Creating…';
 
-      // Try to fetch a cover photo asynchronously (don't block creation if it fails)
+      
       let cover_image = '';
       try {
         const ph = await window.db.integrations.photo((city || '') + ' ' + country);
         if (ph && (ph.url || ph.thumb)) cover_image = ph.url || ph.thumb;
-      } catch (e) { /* ignore */ }
+      } catch (e) {  }
 
       try {
         await window.db.trips.create({

@@ -1,6 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /profile — show user info, points balance, rewards redemption, history.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -12,7 +11,7 @@
     document.getElementById('edit-profile-btn').addEventListener('click', openEditModal);
     await Promise.all([loadTiers(), loadHistory(), loadPreferences()]);
 
-    // Honor #prefs-card deep links (from the profile dropdown menu).
+    
     if (location.hash === '#prefs-card') {
       const card = document.getElementById('prefs-card');
       if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -82,7 +81,7 @@
       if (data.coupon_code) msg += ' Use code ' + data.coupon_code + ' at checkout.';
       else if (data.message) msg = data.message;
       toast.success(msg);
-      // Update local state
+      
       me.points = data.points_after;
       document.getElementById('points-balance').textContent = (me.points || 0).toLocaleString('en-US');
       renderTiers();
@@ -166,9 +165,9 @@
     return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
   }
 
-  /* ── Preferences ────────────────────────────────────────────────────────── */
-  // Defaults must mirror backend defaults so the UI shows sensible values
-  // even before the user has saved anything.
+  
+  
+  
   const PREF_DEFAULTS = {
     theme: 'system', distance_unit: 'km', currency_display: 'AED',
     default_travelers: 1, default_budget_tier: 'moderate', default_trip_duration_days: 3,
@@ -184,7 +183,7 @@
       const data = await window.db.auth.getPreferences();
       prefs = Object.assign({}, PREF_DEFAULTS, data.preferences || {});
     } catch (e) {
-      // Use cached or defaults if we can't read from server.
+      
       prefs = Object.assign({}, PREF_DEFAULTS, (me && me.preferences) || {});
     }
     renderPreferences();
@@ -269,7 +268,7 @@
         if (id === 'pref-theme' && window.applyPreferences) window.applyPreferences(prefs);
         schedulePrefSave();
       });
-      // Number/text fields: also save on blur for snappier UX
+      
       if (el.type === 'number' || el.type === 'text') {
         el.addEventListener('blur', () => {
           const v = el.value; map[id](v); schedulePrefSave();
@@ -292,7 +291,7 @@
   }
 
   function schedulePrefSave() {
-    // Debounce so rapid changes (e.g. typing in a number field) don't spam the API.
+    
     document.getElementById('prefs-status').textContent = 'Saving…';
     if (prefSaveTimer) clearTimeout(prefSaveTimer);
     prefSaveTimer = setTimeout(async () => {

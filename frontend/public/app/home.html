@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/app.css">
   <style>
-    /* ── Hero ────────────────────────────────────────────────── */
+    
     .hero-home {
       position: relative;
       height: 78vh;
@@ -171,7 +171,7 @@
       margin-top: 4px;
     }
 
-    /* ── Feature cards ───────────────────────────────────────── */
+    
     .feature-card {
       position: relative; overflow: hidden;
       display: flex; flex-direction: column;
@@ -228,7 +228,7 @@
     }
     .feature-card:hover .more { gap: 0.7rem; }
 
-    /* ── Destination strip ───────────────────────────────────── */
+    
     .dest-strip {
       display: flex; gap: 1.25rem;
       overflow-x: auto;
@@ -302,7 +302,7 @@
       box-shadow: var(--shadow-xs);
     }
 
-    /* ── AI CTA ──────────────────────────────────────────────── */
+    
     .ai-cta {
       position: relative;
       min-height: 240px;
@@ -367,7 +367,7 @@
     }
     .ai-cta:hover .open-btn { gap: 0.7rem; background: rgba(255,255,255,0.28); }
 
-    /* ── Booking row ─────────────────────────────────────────── */
+    
     .booking-row {
       display: flex; align-items: center; gap: 0.85rem;
       padding: 0.85rem;
@@ -569,7 +569,7 @@
   <script src="/js/sdk.js"></script>
   <script src="/js/app.js"></script>
   <script>
-    // Featured destinations — real cities. Photos are loaded from /api/photo.
+    
     const DESTS = [
       { name: 'Santorini', country: 'Greece',         q: 'Santorini Oia sunset' },
       { name: 'Kyoto',     country: 'Japan',          q: 'Kyoto Fushimi Inari' },
@@ -588,7 +588,7 @@
       document.getElementById('hero-name').textContent = (user.full_name || 'Explorer').split(' ')[0];
       document.getElementById('stat-points').textContent = (user.points || 0).toLocaleString('en-US');
 
-      // Hero rotator
+      
       const bgEl    = document.getElementById('hero-bg');
       const dotsEl  = document.getElementById('hero-dots');
       const labelEl = document.getElementById('hero-label');
@@ -603,7 +603,7 @@
         dotsEl.appendChild(dot);
       });
 
-      // Lazily fill in real photos
+      
       DESTS.forEach((d, i) => {
         db.integrations.photo(d.q).then(r => {
           const im = bgEl.querySelectorAll('img')[i];
@@ -621,7 +621,7 @@
       setActive(0);
       setInterval(() => setActive((active + 1) % DESTS.length), 4500);
 
-      // Destinations strip
+      
       const strip = document.getElementById('dest-strip');
       strip.innerHTML = DESTS.map((d, i) =>
         '<a href="/places?q=' + encodeURIComponent(d.name) + '" class="dest-card" data-strip-i="' + i + '">' +
@@ -638,13 +638,13 @@
         }).catch(() => {});
       });
 
-      // AI CTA hero photo
+      
       db.integrations.photo('travel planning map adventure').then(r => {
         const im = document.getElementById('ai-cta-img');
         if (im && r) im.src = r.url;
       }).catch(() => {});
 
-      // Recommendations
+      
       try {
         const { items } = await db.integrations.recommendations(8);
         if (items && items.length) {
@@ -660,7 +660,7 @@
         }
       } catch (e) {}
 
-      // Stats + recent bookings
+      
       try {
         const [trips, bookings] = await Promise.all([
           db.trips.list().catch(() => []),

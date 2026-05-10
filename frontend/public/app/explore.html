@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/app.css">
   <style>
-    /* ── Light theme palette for Explore (Soft & Dreamy) ─────── */
+    
     :root {
       --ex-bg:       var(--background);
       --ex-surface:  var(--surface);
@@ -22,13 +22,13 @@
     body { background: var(--ex-bg); overflow: hidden; }
     main.app-main { padding-top: 0; height: 100vh; position: relative; background: var(--ex-bg); }
 
-    /* ── Globe stage ───────────────────────────────────────────── */
+    
     #stage { position: absolute; inset: 64px 0 0; }
     body:has(.trial-banner) #stage { top: 104px; }
     #globe-canvas { position: absolute; inset: 0; cursor: grab; }
     #globe-canvas:active { cursor: grabbing; }
 
-    /* Soft vignette */
+    
     .vignette {
       position: absolute; inset: 0; pointer-events: none; z-index: 1;
       background:
@@ -37,7 +37,7 @@
         radial-gradient(circle at 0% 100%, rgba(134,159,140,0.10), transparent 50%);
     }
 
-    /* ── Stage title (when no panel open) ───────────────────── */
+    
     .stage-title {
       position: absolute;
       top: 56px; left: 0; right: 0;
@@ -76,7 +76,7 @@
       pointer-events: none;
     }
 
-    /* ── Featured destinations list (bottom-left) ───────────── */
+    
     .featured-list {
       position: absolute; bottom: 2.5rem; left: 2.5rem; z-index: 5;
       max-width: 240px;
@@ -140,7 +140,7 @@
     .featured-list.hidden-state { opacity: 0; pointer-events: none; }
     @media (max-width: 768px) { .featured-list { display: none; } }
 
-    /* ── Country hover tooltip ──────────────────────────────────── */
+    
     .country-tooltip {
       position: absolute;
       pointer-events: none;
@@ -165,7 +165,7 @@
     .country-tooltip.show { opacity: 1; }
     @media (max-width: 768px) { .country-tooltip { display: none; } }
 
-    /* ── Destination side panel (light) ─────────────────────── */
+    
     .dest-panel {
       position: absolute;
       top: 0; right: 0; bottom: 0;
@@ -337,7 +337,7 @@
       background: var(--surface);
     }
 
-    /* ── Full-screen scene view ─────────────────────────────── */
+    
     .scene {
       position: fixed; inset: 0; z-index: 80;
       background: var(--ex-bg);
@@ -478,7 +478,7 @@
       margin-top: 4px;
     }
 
-    /* ── Globe loader ──────────────────────────────────────── */
+    
     .globe-loader {
       position: absolute; inset: 0;
       display: flex; align-items: center;

@@ -1,13 +1,9 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX — Shared App Styles (Soft & Dreamy v2)
-   Design system: Teal #6EADAD, Sage #869F8C, F7FAFA bg, Sora + DM Sans
-   Used by every page under /app/*.html
-   ═══════════════════════════════════════════════════════════════════════════ */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* Brand tokens */
+  
   --teal:        #6EADAD;
   --teal-600:    #5C9999;
   --teal-700:    #4F8585;
@@ -15,20 +11,20 @@
   --sage:        #869F8C;
   --sage-600:    #6F8676;
 
-  /* Surfaces */
+  
   --background:  #F7FAFA;
   --bg-alt:      #F0F5F2;
   --surface:     #FFFFFF;
   --card:        #FFFFFF;
 
-  /* Text */
+  
   --foreground:        #1A2E2E;
   --text-1:            #1A2E2E;
   --text-2:            #5A7070;
   --text-3:            #8FA3A3;
   --muted-foreground:  #5A7070;
 
-  /* Borders & helpers */
+  
   --border:         #E4EDED;
   --border-subtle:  #F0F4F4;
   --hover-bg:       #F0F6F6;
@@ -36,12 +32,12 @@
   --secondary:      #EDF3F3;
   --destructive:    #CC7070;
 
-  /* Status */
+  
   --success: #6AAF8D;
   --warning: #D4A85C;
   --error:   #CC7070;
 
-  /* Compatibility aliases */
+  
   --primary: #6EADAD;
   --primary-foreground: #FFFFFF;
   --accent:  #869F8C;
@@ -52,12 +48,12 @@
   --sage-20: rgba(134,159,140,0.20);
   --charcoal: #1A2E2E;
 
-  /* Gradients */
+  
   --grad-primary: linear-gradient(135deg, #6EADAD 0%, #869F8C 100%);
   --grad-bg:      linear-gradient(180deg, #F7FAFA 0%, #F0F5F2 100%);
   --grad-warm:    linear-gradient(135deg, #F4E4C8 0%, #E9D4B0 100%);
 
-  /* Shadows */
+  
   --shadow-xs:    0 1px 2px rgba(26,46,46,0.04);
   --shadow-sm:    0 2px 8px rgba(26,46,46,0.04), 0 1px 2px rgba(26,46,46,0.03);
   --shadow-md:    0 8px 24px rgba(26,46,46,0.06), 0 2px 4px rgba(26,46,46,0.03);
@@ -66,7 +62,7 @@
   --shadow-glow:  0 0 0 3px rgba(110,173,173,0.15);
   --shadow-card:  0 12px 32px rgba(26,46,46,0.06), 0 1px 0 rgba(255,255,255,0.5) inset;
 
-  /* Radii */
+  
   --radius:  16px;
   --r-sm:    8px;
   --r-md:    12px;
@@ -99,7 +95,6 @@ a { text-decoration: none; color: inherit; }
 .hidden { display: none !important; }
 ::selection { background: rgba(110,173,173,0.25); }
 
-/* ── Top navbar ─────────────────────────────────────────────── */
 .app-nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 50;
   height: 64px;
@@ -132,7 +127,6 @@ a { text-decoration: none; color: inherit; }
 }
 @media (max-width: 640px) { .app-logo-text { display: none; } }
 
-/* ── Brand wordmark — "exploreX": teal lowercase + dark uppercase X ─── */
 .bx-e {
   font-family: 'Sora', sans-serif;
   color: var(--teal);
@@ -240,7 +234,6 @@ a { text-decoration: none; color: inherit; }
   background: var(--teal-50); color: var(--teal-700);
 }
 
-/* ── Main content wrapper ────────────────────────────────────── */
 main.app-main { padding-top: 64px; min-height: 100vh; background: var(--background); }
 .page-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
 @media (min-width: 768px) { .page-wrap { padding: 2.5rem 2rem; } }
@@ -262,7 +255,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .page-sub { font-size: .95rem; color: var(--text-2); margin-top: .55rem; line-height: 1.55; }
 .page-header { margin-bottom: 2rem; }
 
-/* ── Cards ──────────────────────────────────────────────────── */
 .card {
   background: var(--card);
   border: 1px solid var(--border-subtle);
@@ -280,7 +272,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
   box-shadow: var(--shadow-sm);
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
   padding: 0 1.1rem; height: 44px;
@@ -312,7 +303,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .btn-sm { height: 36px; padding: 0 .85rem; font-size: .8rem; border-radius: 10px; }
 .btn-lg { height: 52px; padding: 0 1.5rem; font-size: 1rem; border-radius: 14px; }
 
-/* ── Inputs ─────────────────────────────────────────────────── */
 .field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1rem; }
 .field-label {
   font-family: 'DM Sans', sans-serif;
@@ -338,7 +328,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .field-textarea { padding: 12px 1rem; resize: vertical; min-height: 110px; height: auto; line-height: 1.5; }
 .field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%235A7070' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
 
-/* ── Pills / Badges ─────────────────────────────────────────── */
 .pill {
   display: inline-flex; align-items: center; gap: .375rem;
   font-family: 'DM Sans', sans-serif;
@@ -359,7 +348,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
   border: 1px solid rgba(255,255,255,0.5);
 }
 
-/* ── Grid helpers ───────────────────────────────────────────── */
 .grid { display: grid; gap: 1.25rem; }
 .grid-2 { grid-template-columns: 1fr; }
 .grid-3 { grid-template-columns: 1fr; }
@@ -374,7 +362,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
   .grid-4 { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* ── Loader ─────────────────────────────────────────────────── */
 .spinner {
   width: 24px; height: 24px;
   border: 2px solid var(--border);
@@ -391,7 +378,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
   background: var(--background); z-index: 100;
 }
 
-/* ── Toasts ─────────────────────────────────────────────────── */
 #toast-container {
   position: fixed; top: 1.25rem; right: 1.25rem; z-index: 9999;
   display: flex; flex-direction: column; gap: .65rem;
@@ -485,7 +471,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
   .toast, .toast-progress { animation: none; }
 }
 
-/* ── Modal ──────────────────────────────────────────────────── */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(26,46,46,0.5);
@@ -517,7 +502,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .modal-close:hover { background: var(--hover-bg); color: var(--text-1); }
 .modal-foot { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.75rem; }
 
-/* ── Empty states ───────────────────────────────────────────── */
 .empty { text-align: center; padding: 3.5rem 1.5rem; }
 .empty-icon {
   width: 72px; height: 72px; border-radius: var(--r-xl);
@@ -529,7 +513,6 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .empty-title { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: .35rem; color: var(--text-1); }
 .empty-sub { font-size: .9rem; color: var(--text-2); max-width: 360px; margin: 0 auto; line-height: 1.5; }
 
-/* ── Utility ────────────────────────────────────────────────── */
 .row { display: flex; align-items: center; gap: .5rem; }
 .row-between { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
 .col { display: flex; flex-direction: column; gap: .5rem; }
@@ -543,12 +526,10 @@ main.app-main { padding-top: 64px; min-height: 100vh; background: var(--backgrou
 .mb-1 { margin-bottom: .25rem; } .mb-2 { margin-bottom: .5rem; } .mb-3 { margin-bottom: .75rem; } .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; }
 .gap-2 { gap: .5rem; } .gap-3 { gap: .75rem; } .gap-4 { gap: 1rem; }
 
-/* ── Lucide icon sizing ─────────────────────────────────────── */
 .icon-sm { width: 16px; height: 16px; flex-shrink: 0; }
 .icon-md { width: 22px; height: 22px; flex-shrink: 0; }
 .icon-lg { width: 32px; height: 32px; flex-shrink: 0; }
 
-/* ── Trial banner + plan chip ───────────────────────────────── */
 .trial-banner {
   position: fixed; top: 64px; left: 0; right: 0; z-index: 40;
   display: flex; align-items: center; justify-content: center; gap: 1rem;
@@ -579,7 +560,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 .plan-chip.plan-medium { background: rgba(212,168,92,0.16); color: #8A6B2F; border: 1px solid rgba(212,168,92,0.32); }
 .plan-chip.plan-high   { background: rgba(110,173,173,0.16); color: var(--teal-700); border: 1px solid rgba(110,173,173,0.32); }
 
-/* ── Plan-gated tease card ──────────────────────────────────── */
 .gate-card {
   text-align: center; padding: 3.5rem 1.75rem;
   border: 1px solid var(--teal-50);
@@ -595,7 +575,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 .gate-card h3 { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 600; margin-bottom: .5rem; color: var(--text-1); }
 .gate-card p  { color: var(--text-2); font-size: .9rem; max-width: 420px; margin: 0 auto 1.5rem; line-height: 1.55; }
 
-/* ── Travel chatbot widget ──────────────────────────────────── */
 .tb-fab {
   position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 90;
   width: 56px; height: 56px; border-radius: 50%;
@@ -664,14 +643,12 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
   .tb-panel { right: 1rem; left: 1rem; bottom: 4.5rem; width: auto; height: 70vh; }
 }
 
-/* ── Favorites grid ─────────────────────────────────────────── */
 .fav-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
-/* ── Profile dropdown points ────────────────────────────────── */
 .profile-menu-points {
   display: inline-flex; align-items: center; gap: .35rem;
   margin-top: .55rem;
@@ -684,7 +661,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 .profile-menu-points .star { color: var(--warning); font-size: .8rem; }
 .profile-menu-points strong { font-weight: 700; }
 
-/* ── Places page hero search ────────────────────────────────── */
 .places-hero {
   background: linear-gradient(135deg, rgba(110,173,173,0.08), rgba(134,159,140,0.06));
   border: 1px solid var(--teal-50);
@@ -775,7 +751,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 }
 .pcard .actions { display: flex; gap: .55rem; margin-top: auto; padding-top: .55rem; }
 
-/* ── Places-page geo banner ─────────────────────────────────── */
 .places-geo {
   display: flex; align-items: center; justify-content: space-between; gap: .75rem;
   padding: .85rem 1.2rem;
@@ -794,7 +769,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 }
 .places-geo button:hover { background: var(--teal-600); }
 
-/* ── Trip cards on /bookings page ───────────────────────────── */
 .trip-card {
   display: grid; grid-template-columns: 240px 1fr;
   gap: 1.5rem; padding: 0;
@@ -830,7 +804,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 .trip-card .stats .l { color: var(--text-2); }
 .trip-card .actions { display: flex; gap: .55rem; flex-wrap: wrap; margin-top: auto; padding-top: .85rem; }
 
-/* ── Trip details inner list ────────────────────────────────── */
 .trip-bookings-list { margin-top: 1rem; padding: 1.25rem 1.5rem; background: var(--background); border-radius: var(--r-md); border: 1px solid var(--border-subtle); }
 .trip-booking-row {
   display: flex; align-items: center; gap: .85rem; padding: .75rem 0;
@@ -844,20 +817,17 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 
 .modal-wide-trip { max-width: 640px; }
 
-/* ── Place detail modal ─────────────────────────────────────── */
 .place-detail-modal { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
 .place-photo-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: .55rem; height: 220px; }
 .place-photo-strip > div { background: var(--muted); border-radius: var(--r-sm); overflow: hidden; }
 .place-photo-strip img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ── Points-history table ───────────────────────────────────── */
 .points-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 .points-table th, .points-table td { padding: .75rem .55rem; border-bottom: 1px solid var(--border-subtle); text-align: left; }
 .points-table th { font-family: 'DM Sans', sans-serif; font-size: .72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
 .points-table .amt-pos { color: #4A7C5E; font-weight: 600; }
 .points-table .amt-neg { color: var(--destructive); font-weight: 600; }
 
-/* ── Reward tier card ───────────────────────────────────────── */
 .reward-tier {
   padding: 1.25rem 1.4rem; border-radius: var(--r-md);
   border: 1px solid var(--border-subtle); background: #fff;
@@ -871,7 +841,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
 .reward-tier .left .cost { color: var(--text-3); font-size: .8rem; margin-top: .2rem; }
 .reward-tier button:disabled { opacity: .55; cursor: not-allowed; }
 
-/* ── Logo fallback ──────────────────────────────────────────── */
 .img-logo-fallback {
   object-fit: contain !important;
   padding: 18% !important;
@@ -880,7 +849,6 @@ body:has(.trial-banner) main.app-main { padding-top: 104px !important; }
   filter: saturate(.4);
 }
 
-/* ── Preferences card ───────────────────────────────────────── */
 .prefs-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
 @media (min-width: 640px) { .prefs-grid { grid-template-columns: 1fr 1fr; } }
 .pref-row { display: flex; flex-direction: column; gap: .4rem; }

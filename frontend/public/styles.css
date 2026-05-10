@@ -1,11 +1,7 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX — Landing Page Styles (Soft & Dreamy v2)
-   Used by index.html — hero slider, about, journey-features, pricing, contact
-   ═══════════════════════════════════════════════════════════════════════════ */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
-/* ── CSS VARIABLES ──────────────────────────────────────────── */
 :root {
   --teal:        #6EADAD;
   --teal-600:    #5C9999;
@@ -56,7 +52,6 @@
   --side-pad: 5rem;
 }
 
-/* ── RESET & BASE ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -75,7 +70,6 @@ button { cursor: pointer; background: none; font-family: inherit; }
 a { text-decoration: none; color: inherit; }
 ::selection { background: rgba(110,173,173,0.25); }
 
-/* ── UTILITIES ──────────────────────────────────────────────── */
 .section-heading {
   font-family: 'Sora', sans-serif;
   font-weight: 700;
@@ -151,7 +145,6 @@ a { text-decoration: none; color: inherit; }
 .reveal { opacity: 0; transform: translateY(20px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
-/* ═══ HERO — "The Airplane Window" ════════════════════════════ */
 #hero {
   position: relative;
   min-height: 100vh;
@@ -169,7 +162,6 @@ a { text-decoration: none; color: inherit; }
   #hero { padding: 96px 4rem 5rem; }
 }
 
-/* Soft cream/teal blobs in the background */
 .hero-blobs { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .hero-blob {
   position: absolute; border-radius: 50%;
@@ -186,7 +178,6 @@ a { text-decoration: none; color: inherit; }
   bottom: -160px; left: -120px;
 }
 
-/* Two-column layout: text on the left, airplane window on the right */
 .hero-grid {
   position: relative;
   z-index: 1;
@@ -205,7 +196,6 @@ a { text-decoration: none; color: inherit; }
   }
 }
 
-/* ── Left column: text ─────────────────────────────────────── */
 .hero-text {
   display: flex;
   flex-direction: column;
@@ -271,7 +261,6 @@ a { text-decoration: none; color: inherit; }
   .hero-sub { font-size: 1.05rem; }
 }
 
-/* CTA: pill + circle-arrow */
 .hero-cta {
   display: inline-flex;
   align-items: center;
@@ -320,7 +309,6 @@ a { text-decoration: none; color: inherit; }
 }
 .hero-cta-circle svg { width: 16px; height: 16px; }
 
-/* ── Right column: the airplane window ───────────────────── */
 .hero-window-stage {
   position: relative;
   display: flex;
@@ -332,11 +320,11 @@ a { text-decoration: none; color: inherit; }
 .plane-window {
   position: relative;
   width: min(100%, 460px);
-  aspect-ratio: 4.4 / 6;       /* taller — matches the reference image */
+  aspect-ratio: 4.4 / 6;       
   max-height: 82vh;
-  /* Gentle rocking motion — like a plane in flight */
+  
   animation: plane-rock 9s ease-in-out infinite;
-  /* Soft halo around the window — suggests it's set into a curved cabin wall */
+  
   filter: drop-shadow(0 30px 50px rgba(26, 46, 46, 0.18))
           drop-shadow(0 8px 16px rgba(26, 46, 46, 0.10));
 }
@@ -349,31 +337,23 @@ a { text-decoration: none; color: inherit; }
   50%      { transform: rotate(0.35deg) translateY(-6px); }
 }
 
-/* ── Concentric ring layers ─────────────────────────────────────
-   A real airplane window has multiple stepped rings going inward —
-   the cabin wall, then insulation, then the plastic frame, then the
-   glass. Each ring sits "deeper" than the last, creating real depth.
-   We do this with 3 nested divs, each slightly inset via padding,
-   each in a slightly different shade of off-white/gray.            */
 .plane-ring {
   position: absolute;
-  /* shape: symmetric tall capsule — top and bottom equally rounded */
+  
   border-radius: 46% / 40%;
 }
 
-/* Outer ring — the cabin wall area immediately around the window */
 .plane-ring-1 {
   inset: 0;
   background: linear-gradient(180deg, #F2F2F2 0%, #E8E8E8 100%);
   padding: clamp(10px, 3.2%, 22px);
-  /* Soft inner highlights — light catching the edge of the cabin trim */
+  
   box-shadow:
     inset 0 2px 4px rgba(255, 255, 255, 0.85),
     inset 0 -2px 6px rgba(180, 180, 180, 0.30),
     inset 0 0 0 1px rgba(220, 220, 220, 0.65);
 }
 
-/* Middle ring — the insulation/gap layer, slightly darker */
 .plane-ring-2 {
   position: relative;
   width: 100%; height: 100%;
@@ -385,7 +365,6 @@ a { text-decoration: none; color: inherit; }
     inset 0 0 0 1px rgba(195, 195, 195, 0.55);
 }
 
-/* Inner ring — the molded plastic frame right around the glass */
 .plane-ring-3 {
   position: relative;
   width: 100%; height: 100%;
@@ -397,7 +376,6 @@ a { text-decoration: none; color: inherit; }
     inset 0 0 0 1px rgba(210, 210, 210, 0.7);
 }
 
-/* Inner glass — where the video plays */
 .plane-window-glass {
   position: relative;
   width: 100%;
@@ -405,7 +383,7 @@ a { text-decoration: none; color: inherit; }
   border-radius: 46% / 40%;
   overflow: hidden;
   background: #B8D5E5;
-  /* Glass sits BACK from the inner frame — deep inset shadow */
+  
   box-shadow:
     inset 0 0 0 2px rgba(120, 120, 120, 0.18),
     inset 0 8px 22px rgba(26, 46, 46, 0.32),
@@ -421,8 +399,6 @@ a { text-decoration: none; color: inherit; }
   display: block;
 }
 
-/* Plexiglass highlight — soft white reflection on the top-left of the glass.
-   Tells the viewer "this is curved acrylic, not a hole".                    */
 .plane-window-glare {
   position: absolute;
   inset: 0;
@@ -436,7 +412,6 @@ a { text-decoration: none; color: inherit; }
   z-index: 2;
 }
 
-/* Subtle inner darkening at the edges — sells the curved-acrylic depth */
 .plane-window-inner-shadow {
   position: absolute;
   inset: 0;
@@ -448,7 +423,6 @@ a { text-decoration: none; color: inherit; }
   z-index: 2;
 }
 
-/* ── Top nav ───────────────────────────────────────────────── */
 .hero-nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30;
   padding: 1.5rem var(--side-pad-mobile);
@@ -477,7 +451,6 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: 0;
 }
 
-/* ── Brand wordmark — "exploreX": teal lowercase + dark uppercase X ─── */
 .bx-e {
   font-family: 'Sora', sans-serif;
   color: var(--teal);
@@ -523,7 +496,6 @@ a { text-decoration: none; color: inherit; }
   box-shadow: 0 12px 26px rgba(110, 173, 173, 0.45);
 }
 
-/* ═══ ABOUT ═══════════════════════════════════════════════════ */
 .about {
   padding: 7rem var(--side-pad-mobile);
   background: var(--background);
@@ -675,7 +647,6 @@ a { text-decoration: none; color: inherit; }
   transition: width 0.1s linear;
 }
 
-/* ═══ JOURNEY FEATURES (immersive section) ════════════════════ */
 #journey-features {
   background: linear-gradient(180deg, var(--bg-alt) 100%, var(--background) 0%);
 }
@@ -735,7 +706,6 @@ a { text-decoration: none; color: inherit; }
 .split-problem { background: linear-gradient(135deg, rgba(26,46,46,0.85), rgba(26,46,46,0.7)); }
 .split-solution { background: linear-gradient(135deg, var(--bg-alt), #fff); }
 
-/* ═══ PRICING ═════════════════════════════════════════════════ */
 .pricing {
   padding: 7rem var(--side-pad-mobile);
   background: var(--background);
@@ -894,7 +864,6 @@ a { text-decoration: none; color: inherit; }
 }
 .plan-btn-outline:hover { background: var(--teal-50); }
 
-/* ═══ CONTACT ═════════════════════════════════════════════════ */
 .contact {
   padding: 7rem var(--side-pad-mobile);
   background: linear-gradient(180deg, var(--bg-alt) 0%, var(--background) 100%);
@@ -962,7 +931,6 @@ a { text-decoration: none; color: inherit; }
   box-shadow: var(--shadow-md);
 }
 
-/* Override .fancy-form helpers from inline (already rounded look) */
 .fancy-form .ff-input {
   background: var(--background) !important;
   border: 1px solid var(--border) !important;
@@ -1015,7 +983,6 @@ a { text-decoration: none; color: inherit; }
   border-radius: var(--r-md) !important;
 }
 
-/* ═══ FOOTER ══════════════════════════════════════════════════ */
 footer {
   padding: 3rem var(--side-pad-mobile);
   background: #fff;
@@ -1051,7 +1018,6 @@ footer {
   color: var(--text-3);
 }
 
-/* ═══ JOURNEY FEATURE — Tailwind-overrides for nicer appearance */
 #journey-features .text-stone-900 { color: var(--text-1) !important; }
 #journey-features .text-stone-500 { color: var(--text-2) !important; }
 #journey-features .border-stone-200 { border-color: var(--border-subtle) !important; }
@@ -1059,11 +1025,6 @@ footer {
 #journey-features .bg-stone-100 { background: var(--background) !important; }
 #journey-features img.parallax-bg { opacity: 0.18 !important; }
 
-/* ═══════════════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE — Breakpoint ≤ 768px
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ── Hamburger nav menu ─────────────────────────────────────── */
 .nav-hamburger {
   display: none;
   flex-direction: column;
@@ -1111,11 +1072,11 @@ footer {
 }
 
 @media (max-width: 768px) {
-  /* Show hamburger, hide desktop nav actions */
+  
   .nav-hamburger { display: flex; }
   .hero-nav-actions { display: none; }
 
-  /* ── Hero ─────────────────────────────────────────────── */
+  
   #hero {
     padding-top: 80px;
     padding-bottom: 3rem;
@@ -1139,7 +1100,7 @@ footer {
     max-height: 55vh !important;
   }
 
-  /* ── About ────────────────────────────────────────────── */
+  
   .about {
     padding: 4rem var(--side-pad-mobile);
   }
@@ -1152,15 +1113,15 @@ footer {
     gap: 1.25rem;
   }
 
-  /* ── Journey Features — DISABLE STICKY SCROLL ON MOBILE ── */
+  
 
-  /* 1. Reset the 300vh section height to auto */
+  
   #journey-features {
     height: auto !important;
     min-height: unset !important;
   }
 
-  /* 2. Remove sticky positioning */
+  
   #journey-features .journey-sticky-wrap {
     position: relative !important;
     height: auto !important;
@@ -1168,7 +1129,7 @@ footer {
     top: auto !important;
   }
 
-  /* 3. Content wrapper: auto height, column flex */
+  
   #journey-features .journey-content-wrap {
     height: auto !important;
     min-height: unset !important;
@@ -1177,7 +1138,7 @@ footer {
     gap: 2rem;
   }
 
-  /* 4. Left column: auto height, no flex centering needed */
+  
   #journey-features .journey-left-col {
     width: 100% !important;
     height: auto !important;
@@ -1185,7 +1146,7 @@ footer {
     display: block !important;
   }
 
-  /* 5. The section header was absolutely positioned — make it relative */
+  
   #journey-features .journey-section-header {
     position: relative !important;
     top: auto !important;
@@ -1194,7 +1155,7 @@ footer {
     padding: 0 0.5rem;
   }
 
-  /* 6. Cards container: auto height, column, all visible */
+  
   #journey-features .journey-cards-container {
     position: relative !important;
     height: auto !important;
@@ -1206,40 +1167,40 @@ footer {
     justify-content: flex-start !important;
   }
 
-  /* 7. Hide the progress SVG */
+  
   #journey-features .journey-progress-svg {
     display: none !important;
   }
 
-  /* 8. All journey card-inners: fully visible, no fade/scale */
+  
   .journey-card .card-inner {
     opacity: 1 !important;
     transform: scale(1) !important;
   }
 
-  /* 9. Journey dots: all styled same (active) */
+  
   .journey-dot {
     background: white !important;
     box-shadow: 0 0 0 3px rgba(110,173,173,0.18) !important;
     border-color: #6EADAD !important;
   }
 
-  /* 10. Journey card layout: push dot left less on mobile */
+  
   .journey-card {
     margin-top: 0 !important;
   }
 
- /* 11. Right column (Problem/Solution panel): hide completely on mobile */
+ 
 #journey-features .journey-right-col {
     display: none !important;
 }
 
-  /* 15. Hide the drag handle */
+  
   #split-handle {
     display: none !important;
   }
 
-  /* ── Pricing ──────────────────────────────────────────── */
+  
   .pricing {
     padding: 4rem var(--side-pad-mobile);
   }
@@ -1253,7 +1214,7 @@ footer {
     order: -1;
   }
 
-  /* ── Contact ──────────────────────────────────────────── */
+  
   .contact {
     padding: 4rem var(--side-pad-mobile);
   }
@@ -1262,12 +1223,12 @@ footer {
     gap: 2rem;
   }
 
-  /* ── Footer ────────────────────────────────────────────── */
+  
   .footer-links {
     gap: 1.25rem;
   }
 
-  /* ── Scroll-reveal: don't let sections overflow ────────── */
+  
   .hidden-reveal {
     overflow: hidden;
   }

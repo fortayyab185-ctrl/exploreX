@@ -1,21 +1,16 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX App Shell — vanilla JS
-   - Top nav (with "Places" instead of "Connect")
-   - Profile dropdown shows points balance + Connect link
-   - Toast helper, modal helper, plan-gate helper
-   - Trial banner + seasonal-offer banner
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
-  /* ── Toasts ─────────────────────────────────────────────────────────────── */
+  
   function ensureToastContainer() {
     let c = document.getElementById('toast-container');
     if (!c) { c = document.createElement('div'); c.id = 'toast-container'; document.body.appendChild(c); }
     return c;
   }
 
-  // Inline SVG icons (no Lucide dependency required at toast-time)
+  
   const TOAST_ICONS = {
     success: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
     error:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
@@ -25,7 +20,7 @@
   const TOAST_DEFAULT_TITLES = { success: 'Success', error: 'Error', info: 'Info', loading: 'Working…' };
 
   function showToast(opts) {
-    // Allow shorthand: showToast('text') becomes { type:'info', message:'text' }
+    
     if (typeof opts === 'string') opts = { message: opts };
     const type = opts.type || 'info';
     const message = opts.message || '';
@@ -52,7 +47,7 @@
       if (dismissed) return;
       dismissed = true;
       el.classList.add('toast-leaving');
-      // Match the slide-out animation duration.
+      
       setTimeout(() => el.remove(), 280);
     };
 
@@ -65,7 +60,7 @@
     let timer;
     if (!sticky) timer = setTimeout(dismiss, duration);
 
-    // Pause progress on hover so the user has time to read long messages.
+    
     if (!sticky) {
       const prog = el.querySelector('.toast-progress');
       el.addEventListener('mouseenter', () => {
@@ -80,7 +75,7 @@
 
     return {
       dismiss,
-      // For loading toasts: replace the toast in-place with a final state.
+      
       update: (newOpts) => {
         const newType = newOpts.type || type;
         el.className = 'toast toast-' + newType;
@@ -96,7 +91,7 @@
           newMsg.className = 'toast-msg'; newMsg.textContent = newOpts.message;
           body.appendChild(newMsg);
         }
-        // Re-add a progress bar and auto-dismiss for the new state.
+        
         const oldProg = el.querySelector('.toast-progress');
         if (oldProg) oldProg.remove();
         const newDuration = newOpts.duration || 4000;
@@ -112,12 +107,8 @@
     };
   }
 
-  /* ── Global image fallback ──────────────────────────────────────────────────
-     Any <img data-fallback="logo"> that fails to load (Unsplash 404, network
-     error, broken URL) is automatically replaced with the ExploreX logo.
-     We also cover bare <img> elements on common hero/card surfaces by listening
-     globally, but only swap when the broken src is a remote http(s) URL so we
-     don't loop on the logo itself. ──────────────────────────────────────────── */
+  
+
   document.addEventListener('error', function (e) {
     const el = e.target;
     if (!el || el.tagName !== 'IMG') return;
@@ -134,17 +125,17 @@
     return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
   }
 
-  // Public API — keeps backwards-compat with toast.success(msg) etc.
+  
   window.toast = {
     success: (msg, opts) => showToast(Object.assign({ type: 'success', message: msg }, opts || {})),
     error:   (msg, opts) => showToast(Object.assign({ type: 'error',   message: msg }, opts || {})),
     info:    (msg, opts) => showToast(Object.assign({ type: 'info',    message: msg }, opts || {})),
     loading: (msg, opts) => showToast(Object.assign({ type: 'loading', message: msg, duration: 0 }, opts || {})),
-    // Generic — caller passes the full options object (including title etc.)
+    
     show:    (opts)      => showToast(opts || {}),
   };
 
-  /* ── Modal helper ───────────────────────────────────────────────────────── */
+  
   window.openModal = function (innerHTML, opts) {
     opts = opts || {};
     const wrap = document.createElement('div');
@@ -158,7 +149,7 @@
     return { close, root: wrap };
   };
 
-  /* ── Confirm modal (returns Promise<boolean>) ───────────────────────────── */
+  
   window.confirmModal = function (opts) {
     return new Promise(resolve => {
       const o = Object.assign({ title: 'Confirm', message: 'Are you sure?', confirm: 'Confirm', cancel: 'Cancel', danger: false }, opts || {});
@@ -174,7 +165,7 @@
     });
   };
 
-  /* ── Plan gate ──────────────────────────────────────────────────────────── */
+  
   window.requirePlan = function (level, featureName) {
     if (!window.currentUser) return false;
     if (db.hasPlan(window.currentUser, level)) return true;
@@ -192,7 +183,7 @@
     openModal(html);
   }
 
-  /* ── Nav structure ──────────────────────────────────────────────────────── */
+  
   const MAIN_NAV = [
     { path: '/explore',  label: 'Explore'    },
     { path: '/places',   label: 'Places'     },
@@ -308,10 +299,10 @@ MAIN_NAV.forEach(n => { nav += '<a href="' + n.path + '" class="' + (cur === n.p
   }
   window.escapeHtml = escapeHtml;
 
-  /* ── Boot ───────────────────────────────────────────────────────────────── */
-  /* ── Theme — light only ─────────────────────────────────────────────────── */
+  
+  
   function applyTheme(theme) {
-    // Dark theme removed — site is always light.
+    
     const root = document.documentElement;
     root.classList.remove('theme-dark');
     root.classList.add('theme-light');
@@ -321,17 +312,17 @@ MAIN_NAV.forEach(n => { nav += '<a href="' + n.path + '" class="' + (cur === n.p
     if (!prefs) return;
     window.userPreferences = prefs;
     applyTheme('light');
-    // Cache locally so the next page load can apply theme INSTANTLY
-    // before /api/auth/me resolves, avoiding a flash of light theme.
+    
+    
     try { localStorage.setItem('explorex_prefs', JSON.stringify(prefs)); } catch (e) {}
   }
-  // Apply cached prefs immediately on script load (before bootApp finishes).
+  
   try {
     const cached = JSON.parse(localStorage.getItem('explorex_prefs') || 'null');
     if (cached) applyPreferences(cached);
   } catch (e) {}
 
-  // React to OS dark-mode changes when user is on 'system' theme.
+  
   if (window.matchMedia) {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     if (mq.addEventListener) mq.addEventListener('change', () => {

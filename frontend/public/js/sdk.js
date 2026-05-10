@@ -1,6 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX SDK — vanilla JS API wrapper
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function (global) {
   'use strict';
 
@@ -142,7 +141,7 @@
 
   const Users = { list() { return apiFetch('/api/users'); } };
 
-  // ── Geolocation helper (cached for 30 minutes) ─────────────────────────────
+  
   const GEO_KEY = 'explorex_geo';
   const geo = {
     cached() {
@@ -151,7 +150,7 @@
         if (!raw) return null;
         const obj = JSON.parse(raw);
         if (!obj || !obj.ts) return null;
-        if (Date.now() - obj.ts > 30 * 60 * 1000) return null;  // 30 min
+        if (Date.now() - obj.ts > 30 * 60 * 1000) return null;  
         return obj;
       } catch (e) { return null; }
     },

@@ -1,10 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   Connect page — discover, requests, connections, trip invites
-   Bug fixes:
-   - Use list() (no filter) to fetch all connections so receiver sees them
-   - Accept/Reject correctly mutate status and refresh both inboxes
-   - Invite-to-Trip only available for accepted connections
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -142,7 +137,7 @@
         </div>`).join('') + '</div>';
     }
 
-    // Wire all action buttons in the rendered content
+    
     document.querySelectorAll('#tab-content [data-act]').forEach(btn => btn.addEventListener('click', handleAction));
   }
 

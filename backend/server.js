@@ -1,8 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX — Backend
-   Node.js / Express / MongoDB / Groq AI / Unsplash
-   See README.md for setup instructions.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -23,12 +20,10 @@ const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || '';
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY || '';
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 
-// ─── MongoDB Connection ────────────────────────────────────────────────────────
 mongoose.connect(MONGO_URI)
   .then(async () => { console.log('MongoDB connected:', MONGO_URI); await seedPlacesIfEmpty(); })
   .catch(err => { console.error('MongoDB connection error:', err.message); process.exit(1); });
 
-// ─── Schemas & Models ─────────────────────────────────────────────────────────
 const ts = {
   created_date: { type: Date, default: Date.now },
   updated_date: { type: Date, default: Date.now },
@@ -45,11 +40,11 @@ const UserSchema = new mongoose.Schema({
   budget_preference: { type: String, default: 'moderate' },
   travel_style: { type: String, default: 'balanced' },
   points: { type: Number, default: 0 },
-  last_login_date: { type: String, default: '' },         // YYYY-MM-DD for daily login points
+  last_login_date: { type: String, default: '' },         
 
-  // User preferences — controls UI behavior and chatbot/planner personalization.
-  // We store them flat under `preferences` so the frontend can PATCH the whole
-  // bag in one call without conflicts with the top-level identity fields.
+  
+  
+  
   preferences: {
     theme: { type: String, enum: ['system', 'light', 'dark'], default: 'system' },
     distance_unit: { type: String, enum: ['km', 'mi'], default: 'km' },
@@ -60,7 +55,7 @@ const UserSchema = new mongoose.Schema({
     notify_email: { type: Boolean, default: true },
     notify_in_app: { type: Boolean, default: true },
     weekly_digest: { type: Boolean, default: false },
-    auto_geo: { type: Boolean, default: true },     // ask for location automatically
+    auto_geo: { type: Boolean, default: true },     
     home_currency: { type: String, default: 'AED' },
     language: { type: String, default: 'en' },
   },
@@ -81,29 +76,27 @@ const UserSchema = new mongoose.Schema({
   ...ts,
 });
 
-// A "Trip" is the top-level container — destination + date range. Bookings
-// belong to a trip and live within its window.
 const TripSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
   destination_country: { type: String, required: true },
   destination_city: { type: String, default: '' },
-  start_date: { type: String, required: true },          // ISO YYYY-MM-DD
-  end_date: { type: String, required: true },          // ISO YYYY-MM-DD
+  start_date: { type: String, required: true },          
+  end_date: { type: String, required: true },          
   travelers: { type: Number, default: 1 },
   budget: { type: Number, default: 0 },
   notes: String,
   cover_image: String,
   status: { type: String, enum: ['planned', 'active', 'completed', 'cancelled'], default: 'planned' },
-  // Points-tracking flags so we don't double-award
+  
   points_started_awarded: { type: Boolean, default: false },
   points_completed_awarded: { type: Boolean, default: false },
-  cancelled_at: { type: Date, default: null },            // for the 24h re-book cooldown
+  cancelled_at: { type: Date, default: null },            
   ...ts,
 });
 
 const BookingSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
-  trip_id: { type: String, default: '' },        // optional link to a Trip
+  trip_id: { type: String, default: '' },        
   place_id: String,
   place_name: { type: String, required: true },
   place_type: String,
@@ -115,10 +108,10 @@ const BookingSchema = new mongoose.Schema({
   total_price: Number,
   notes: String,
   confirmation_code: String,
-  // Payment fields (Stripe one-time checkout for paid bookings)
+  
   payment_status: { type: String, enum: ['unpaid', 'pending', 'paid', 'refunded', 'free'], default: 'free' },
   payment_amount: Number,
-  payment_method: String,                              // 'stripe' | etc.
+  payment_method: String,                              
   stripe_session_id: String,
   ...ts,
 });
@@ -234,10 +227,9 @@ const TripInviteSchema = new mongoose.Schema({
   ...ts,
 });
 
-// History of point gains/spends for the /profile points history view
 const PointsLogSchema = new mongoose.Schema({
   created_by: { type: String, required: true },
-  amount: { type: Number, required: true },             // positive = earn, negative = spend
+  amount: { type: Number, required: true },             
   reason: { type: String, required: true },
   meta: { type: Object, default: {} },
   ...ts,
@@ -258,11 +250,9 @@ const PointsLog = mongoose.model('PointsLog', PointsLogSchema);
 
 const MODELS = { Trip, Booking, Connection, Itinerary, Message, Notification, Place, Subscription, TripInvite, Favorite, PointsLog };
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 function effectivePlan(user) {
   if (!user) return 'free';
   if (user.trial_active && user.trial_start_date) {
@@ -326,7 +316,6 @@ function requirePlan(minLevel) {
   };
 }
 
-// Award points + write a log entry. Always logs (so the /profile history is honest).
 async function awardPoints(userEmailOrId, amount, reason, meta) {
   if (!amount) return;
   try {
@@ -368,14 +357,11 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// ISO date helpers (treat dates as "calendar days" with no timezones)
 function isoDate(d) { return new Date(d).toISOString().slice(0, 10); }
 function todayISO() { return new Date().toISOString().slice(0, 10); }
 
-// Two ranges overlap if startA <= endB AND startB <= endA (inclusive)
 function rangesOverlap(s1, e1, s2, e2) { return s1 <= e2 && s2 <= e1; }
 
-// ─── Generic CRUD factory (simple entities only — Trip/Booking have their own) ─
 function entityRouter(modelName) {
   const Model = MODELS[modelName];
   const router = express.Router();
@@ -409,9 +395,9 @@ function entityRouter(modelName) {
   router.post('/', authMiddleware, async (req, res) => {
     try {
       const doc = await Model.create({ ...req.body, created_by: req.userEmail, created_date: new Date(), updated_date: new Date() });
-      // Connection accept → +10 to both sides
+      
       if (modelName === 'Connection' && req.body.status === 'accepted') {
-        // Note: only awards once thanks to points_awarded flag below
+        
       }
       res.status(201).json(toJSON(doc));
     } catch (e) { res.status(500).json({ error: e.message }); }
@@ -427,12 +413,12 @@ function entityRouter(modelName) {
       );
       if (!doc) return res.status(404).json({ error: 'Not found' });
 
-      // Connection: pending → accepted awards +10 to both ends, once
+      
       if (modelName === 'Connection' && before && before.status !== 'accepted' && req.body.status === 'accepted' && !before.points_awarded) {
         await Connection.findByIdAndUpdate(doc._id, { $set: { points_awarded: true } });
         awardPoints(before.from_user, 10, 'Connection accepted', { connection_id: before._id.toString() });
         awardPoints(before.to_user, 10, 'Connection accepted', { connection_id: before._id.toString() });
-        // Notify both
+        
         Notification.create({ created_by: before.from_user, title: 'New travel buddy', message: 'You and ' + (before.to_name || before.to_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(() => { });
         Notification.create({ created_by: before.to_user, title: 'New travel buddy', message: 'You and ' + (before.from_name || before.from_user) + ' are now connected (+10 pts)', type: 'social', link: '/connect' }).catch(() => { });
       }
@@ -449,7 +435,6 @@ function entityRouter(modelName) {
   return router;
 }
 
-// ─── Auth Routes ──────────────────────────────────────────────────────────────
 async function maybeAwardDailyLogin(user) {
   const today = todayISO();
   if (user.last_login_date === today) return;
@@ -492,7 +477,7 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
     await maybeAwardDailyLogin(user);
-    // Re-fetch in case points were just awarded
+    
     const fresh = await User.findById(user._id);
     res.json(formatUser(fresh));
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -504,8 +489,8 @@ app.patch('/api/auth/me', authMiddleware, async (req, res) => {
     const updates = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
-    // Preferences PATCH — merge incoming keys onto existing preferences so
-    // partial updates (e.g. just toggling theme) don't wipe other settings.
+    
+    
     if (req.body.preferences && typeof req.body.preferences === 'object') {
       const u = await User.findById(req.userId);
       const merged = Object.assign({}, (u && u.preferences && u.preferences.toObject) ? u.preferences.toObject() : (u && u.preferences) || {}, req.body.preferences);
@@ -519,8 +504,6 @@ app.patch('/api/auth/me', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Dedicated preferences GET/PATCH — keeps the API readable and keeps the
-// preferences logic isolated from identity-field updates.
 app.get('/api/me/preferences', authMiddleware, async (req, res) => {
   try {
     const u = await User.findById(req.userId).lean();
@@ -542,7 +525,6 @@ app.patch('/api/me/preferences', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Google OAuth — verify ID token issued by Google Identity Services
 app.post('/api/auth/google', async (req, res) => {
   try {
     if (!GOOGLE_CLIENT_ID) return res.status(503).json({ error: 'Google Sign-In not configured. Set GOOGLE_CLIENT_ID in .env' });
@@ -581,7 +563,6 @@ app.post('/api/auth/google', async (req, res) => {
   } catch (e) { console.error('Google auth error:', e); res.status(500).json({ error: e.message }); }
 });
 
-// 24-hour free trial of Max plan
 app.post('/api/auth/start-trial', authMiddleware, async (req, res) => {
   try {
     const u = await User.findById(req.userId);
@@ -594,7 +575,6 @@ app.post('/api/auth/start-trial', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Rewards: redemption tiers ────────────────────────────────────────────────
 const REWARD_TIERS = [
   { id: 'medium-10', cost: 500, label: '10% off Pro plan', kind: 'discount', plan: 'medium', percent: 10 },
   { id: 'high-10', cost: 1000, label: '10% off Max plan', kind: 'discount', plan: 'high', percent: 10 },
@@ -626,7 +606,7 @@ app.post('/api/rewards/redeem', authMiddleware, async (req, res) => {
 
     let voucher = null;
     if (tier.kind === 'discount') {
-      // Try to make a Stripe coupon if Stripe is configured
+      
       if (stripe) {
         try {
           const c = await stripe.coupons.create({ percent_off: tier.percent, duration: 'once', name: 'ExploreX rewards: ' + tier.percent + '% off' });
@@ -637,7 +617,7 @@ app.post('/api/rewards/redeem', authMiddleware, async (req, res) => {
         voucher = { code: 'EXTRA' + tier.percent + '-' + Math.random().toString(36).slice(2, 8).toUpperCase(), percent_off: tier.percent };
       }
     } else if (tier.kind === 'free_month') {
-      // Manual override: extend membership_until by 30 days
+      
       const until = u.membership_until && new Date(u.membership_until) > new Date() ? new Date(u.membership_until) : new Date();
       until.setDate(until.getDate() + 30);
       u.membership = 'medium';
@@ -651,11 +631,10 @@ app.post('/api/rewards/redeem', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// All users — for Connect page
 app.get('/api/users', authMiddleware, async (req, res) => {
   try {
     const users = await User.find({}).lean();
-    // Attach active-trip badge so Connect can show "Traveling to ..."
+    
     const activeTrips = await Trip.find({ status: { $in: ['planned', 'active'] }, end_date: { $gte: todayISO() }, start_date: { $lte: todayISO() } }).lean();
     const tripByEmail = {};
     activeTrips.forEach(t => { tripByEmail[t.created_by] = t; });
@@ -674,7 +653,6 @@ app.get('/api/users', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── AI: generic invoke (used by chatbot, planner schemas, etc) ──────────────
 app.post('/api/ai/invoke', authMiddleware, async (req, res) => {
   try {
     const { prompt, response_json_schema, messages: chatHistory } = req.body;
@@ -736,7 +714,7 @@ function mockAI(prompt) {
       things_to_avoid: ['Heavy coats', 'Staying indoors all day'],
     };
   }
-  // Mock itinerary — uses generic-but-plausible names so it's still helpful without GROQ
+  
   return {
     title: 'A Perfect Day in ' + city,
     weather_summary: 'Beautiful sunny day in ' + city + ', around 24°C. Perfect for exploring!',
@@ -751,7 +729,6 @@ function mockAI(prompt) {
   };
 }
 
-// ─── File Upload (multer) ────────────────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
@@ -764,7 +741,7 @@ if (multer) {
       cb(null, Date.now() + '-' + Math.random().toString(36).slice(2) + ext);
     },
   });
-  upload = multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } }); // 500 MB
+  upload = multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } }); 
 }
 
 app.use('/uploads', express.static(UPLOADS_DIR));
@@ -779,7 +756,6 @@ app.post('/api/upload', authMiddleware, (req, res, next) => {
   });
 });
 
-// ─── Site Config (about video, etc.) ──────────────────────────────────────────
 const SITE_CONFIG_PATH = path.join(__dirname, 'site-config.json');
 function loadSiteConfig() {
   try { return JSON.parse(fs.readFileSync(SITE_CONFIG_PATH, 'utf8')); }
@@ -789,10 +765,8 @@ function saveSiteConfig(cfg) {
   fs.writeFileSync(SITE_CONFIG_PATH, JSON.stringify(cfg, null, 2));
 }
 
-// Public — the landing page reads this to display the about video
 app.get('/api/config/site', (_req, res) => res.json(loadSiteConfig()));
 
-// Upload or set the about-section video URL (auth required — only you can change it)
 app.post('/api/config/about-video', authMiddleware, (req, res, next) => {
   function handleUpdate(videoUrl) {
     const cfg = loadSiteConfig();
@@ -807,69 +781,68 @@ app.post('/api/config/about-video', authMiddleware, (req, res, next) => {
       if (req.file) {
         return handleUpdate(APP_URL + '/uploads/' + req.file.filename);
       }
-      // No file attached — check for a URL in the body
+      
       if (req.body && req.body.url) return handleUpdate(req.body.url);
       res.status(400).json({ error: 'Send a video file (field: video) or a url in the body' });
     });
   } else {
-    // multer not installed — only URL-based update is supported
+    
     if (req.body && req.body.url) return handleUpdate(req.body.url);
     res.status(503).json({ error: 'File upload not available — run: npm install multer' });
   }
 });
 
-// ─── Seed catalog of bookable places ─────────────────────────────────────────
 async function seedPlacesIfEmpty() {
   try {
     const count = await Place.countDocuments();
     if (count > 0) { return; }
     const seedData = [
-      // PARIS
+      
       { name: "Le Petit Bistro", city: "Paris", country: "France", type: "restaurant", price_level: "moderate", avg_price: 65, rating: 4.7, capacity: 4, image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=85", short_description: "Classic French bistro with seasonal menu", description: "Tucked in a cobblestone alley in the Marais, Le Petit Bistro serves rotating French classics with locally sourced ingredients.", opening_hours: "12:00 PM - 11:00 PM", featured: true, latitude: 48.857, longitude: 2.352 },
       { name: "Eiffel Tower Skip-the-Line", city: "Paris", country: "France", type: "attraction", price_level: "moderate", avg_price: 45, rating: 4.8, capacity: 8, image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&q=85", short_description: "Priority access + summit climb", description: "Bypass the queues with a guided tour to the second floor, then head to the summit for panoramic views.", opening_hours: "9:00 AM - 11:45 PM", featured: true, latitude: 48.858, longitude: 2.294 },
       { name: "Hotel des Arts", city: "Paris", country: "France", type: "hotel", price_level: "premium", avg_price: 220, rating: 4.6, capacity: 2, image_url: "https://images.unsplash.com/photo-1455587734955-081b22074882?w=900&q=85", short_description: "Boutique hotel near Louvre", description: "Charming 4-star boutique hotel a 5-minute walk from the Louvre. Continental breakfast included.", opening_hours: "24/7", latitude: 48.860, longitude: 2.337 },
 
-      // KYOTO
+      
       { name: "Kaiseki Dinner Experience", city: "Kyoto", country: "Japan", type: "restaurant", price_level: "luxury", avg_price: 180, rating: 4.9, capacity: 6, image_url: "https://images.unsplash.com/photo-1553621042-f6e147245754?w=900&q=85", short_description: "12-course traditional kaiseki", description: "Multi-course haute cuisine in a traditional ryotei overlooking a private moss garden.", opening_hours: "5:00 PM - 10:00 PM", featured: true, latitude: 35.012, longitude: 135.768 },
       { name: "Fushimi Inari Shrine Tour", city: "Kyoto", country: "Japan", type: "attraction", price_level: "budget", avg_price: 25, rating: 4.9, capacity: 12, image_url: "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=900&q=85", short_description: "Walk the famous torii gates", description: "Guided morning hike through 10,000 vermillion gates with stories of the Inari kami.", opening_hours: "5:30 AM - 7:00 PM", featured: true, latitude: 34.967, longitude: 135.772 },
       { name: "Tea Ceremony in Gion", city: "Kyoto", country: "Japan", type: "event", price_level: "moderate", avg_price: 55, rating: 4.7, capacity: 6, image_url: "https://images.unsplash.com/photo-1578469645742-46cae010e5d4?w=900&q=85", short_description: "Authentic matcha experience", description: "60-minute tea ceremony in a 200-year-old machiya guided by a certified tea master.", opening_hours: "10:00 AM - 5:00 PM", event_date: "Daily" },
 
-      // SANTORINI
+      
       { name: "Sunset Catamaran Cruise", city: "Santorini", country: "Greece", type: "event", price_level: "premium", avg_price: 110, rating: 4.8, capacity: 10, image_url: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=900&q=85", short_description: "5-hour cruise with dinner", description: "Sail past the volcanic caldera, swim in hot springs, and enjoy a Greek dinner as the sun sets over Oia.", opening_hours: "3:00 PM - 8:00 PM", featured: true, latitude: 36.393, longitude: 25.461 },
       { name: "Cliffside Suite — Oia", city: "Santorini", country: "Greece", type: "hotel", price_level: "luxury", avg_price: 480, rating: 4.9, capacity: 2, image_url: "https://images.unsplash.com/photo-1602343168117-bb8ffe3e2e9f?w=900&q=85", short_description: "Private plunge pool + caldera view", description: "Iconic cave-style suite carved into the cliff with 180° caldera views and a heated infinity plunge pool.", opening_hours: "24/7", latitude: 36.461, longitude: 25.376 },
       { name: "Ammoudi Bay Seafood", city: "Santorini", country: "Greece", type: "restaurant", price_level: "premium", avg_price: 85, rating: 4.7, capacity: 6, image_url: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=900&q=85", short_description: "Fresh-catch tavernas by the water", description: "Family-run taverna at the foot of Oia where the day's catch is served on a candlelit dock.", opening_hours: "12:00 PM - 11:30 PM" },
 
-      // BALI
+      
       { name: "Ubud Rice Terrace Trek", city: "Bali", country: "Indonesia", type: "attraction", price_level: "budget", avg_price: 35, rating: 4.7, capacity: 10, image_url: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=900&q=85", short_description: "Half-day guided trek", description: "Trek through the Tegalalang and Tegallantang rice terraces with stops at coffee plantations.", opening_hours: "6:00 AM - 6:00 PM", featured: true, latitude: -8.34, longitude: 115.09 },
       { name: "Beachfront Villa — Seminyak", city: "Bali", country: "Indonesia", type: "hotel", price_level: "premium", avg_price: 320, rating: 4.8, capacity: 4, image_url: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=900&q=85", short_description: "Private pool + butler service", description: "3-bedroom beachfront villa with private pool, daily breakfast, and dedicated butler.", opening_hours: "24/7" },
       { name: "Yoga & Sound Healing Retreat", city: "Bali", country: "Indonesia", type: "event", price_level: "moderate", avg_price: 70, rating: 4.9, capacity: 15, image_url: "https://images.unsplash.com/photo-1545389336-cf090694435e?w=900&q=85", short_description: "Morning class in jungle studio", description: "90-minute Vinyasa flow followed by 60 minutes of singing-bowl sound healing.", opening_hours: "7:00 AM - 9:00 AM" },
 
-      // DUBAI
+      
       { name: "Burj Khalifa At The Top SKY", city: "Dubai", country: "UAE", type: "attraction", price_level: "premium", avg_price: 150, rating: 4.7, capacity: 4, image_url: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=900&q=85", short_description: "Floor 148 + lounge access", description: "Highest observation deck in the world (555m) with refreshments and priority elevator access.", opening_hours: "8:30 AM - 11:00 PM", featured: true, latitude: 25.197, longitude: 55.274 },
       { name: "Desert Safari with Bedouin Dinner", city: "Dubai", country: "UAE", type: "event", price_level: "moderate", avg_price: 90, rating: 4.8, capacity: 8, image_url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=900&q=85", short_description: "Dune bashing + camel ride + dinner", description: "Afternoon dune bashing in 4x4s, sandboarding, falconry, camel ride, and a 5-course Bedouin BBQ under the stars.", opening_hours: "3:00 PM - 10:00 PM" },
 
-      // MARRAKECH
+      
       { name: "Riad El Fenn", city: "Marrakech", country: "Morocco", type: "hotel", price_level: "luxury", avg_price: 280, rating: 4.8, capacity: 2, image_url: "https://images.unsplash.com/photo-1489493585363-d69421e0edd3?w=900&q=85", short_description: "Restored riad in Medina", description: "Boutique luxury riad in the heart of the Medina with 6 internal courtyards and rooftop hammam.", opening_hours: "24/7", featured: true, latitude: 31.625, longitude: -7.989 },
       { name: "Jemaa el-Fnaa Food Tour", city: "Marrakech", country: "Morocco", type: "event", price_level: "budget", avg_price: 40, rating: 4.7, capacity: 8, image_url: "https://images.unsplash.com/photo-1597212618440-806262de4f6b?w=900&q=85", short_description: "Evening street food walk", description: "3-hour tour of the famous square — try tagine, b'stilla, harira, and mint tea with a local foodie.", opening_hours: "6:00 PM - 9:00 PM" },
 
-      // NEW YORK
+      
       { name: "Top of the Rock Observatory", city: "New York", country: "USA", type: "attraction", price_level: "moderate", avg_price: 40, rating: 4.7, capacity: 6, image_url: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=900&q=85", short_description: "Sunset views of Manhattan", description: "70 floors up at Rockefeller Center with views of Central Park and the Empire State Building.", opening_hours: "9:00 AM - 11:00 PM", featured: true, latitude: 40.759, longitude: -73.979 },
       { name: "Brooklyn Pizza Tour", city: "New York", country: "USA", type: "event", price_level: "budget", avg_price: 65, rating: 4.8, capacity: 10, image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=900&q=85", short_description: "3-hour walking food tour", description: "Visit 4 legendary Brooklyn pizzerias with stops at Di Fara, Roberta's, and L&B Spumoni Gardens.", opening_hours: "11:00 AM - 4:00 PM" },
       { name: "Broadway Show Premium Seats", city: "New York", country: "USA", type: "event", price_level: "premium", avg_price: 175, rating: 4.9, capacity: 4, image_url: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=900&q=85", short_description: "Orchestra seats + program", description: "Best-available orchestra seats for current Broadway productions. Program guide included.", opening_hours: "Show times vary" },
 
-      // MALDIVES
+      
       { name: "Overwater Villa — Soneva Jani", city: "Maldives", country: "Maldives", type: "hotel", price_level: "luxury", avg_price: 950, rating: 5.0, capacity: 2, image_url: "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=900&q=85", short_description: "Private slide into lagoon", description: "1-bedroom overwater villa with a slide directly into the lagoon, retractable roof, and personal Mr/Mrs Friday.", opening_hours: "24/7", featured: true },
       { name: "Manta Ray Snorkel Excursion", city: "Maldives", country: "Maldives", type: "event", price_level: "premium", avg_price: 130, rating: 4.9, capacity: 6, image_url: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?w=900&q=85", short_description: "Half-day boat trip", description: "Snorkel with manta rays at Hanifaru Bay. Includes equipment, lunch, and marine biologist guide.", opening_hours: "8:00 AM - 1:00 PM" },
 
-      // PATAGONIA
+      
       { name: "Perito Moreno Glacier Trek", city: "Patagonia", country: "Argentina", type: "event", price_level: "premium", avg_price: 180, rating: 4.9, capacity: 8, image_url: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=900&q=85", short_description: "Mini-trekking on the ice", description: "Strap on crampons and hike the iconic glacier with certified guides.", opening_hours: "8:00 AM - 4:00 PM", featured: true },
       { name: "Estancia Cristina Lodge", city: "Patagonia", country: "Argentina", type: "hotel", price_level: "luxury", avg_price: 540, rating: 4.8, capacity: 4, image_url: "https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=900&q=85", short_description: "Remote lodge with full board", description: "Historic estancia accessible only by boat. Includes all meals and guided excursions.", opening_hours: "24/7" },
 
-      // MACHU PICCHU
+      
       { name: "Inca Trail 4-Day Trek", city: "Machu Picchu", country: "Peru", type: "event", price_level: "premium", avg_price: 750, rating: 4.9, capacity: 10, image_url: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=900&q=85", short_description: "Classic 45km Inca Trail", description: "4-day guided trek to Machu Picchu via the original Inca Trail.", opening_hours: "Daily departures", featured: true },
       { name: "Sacred Valley Day Tour", city: "Machu Picchu", country: "Peru", type: "event", price_level: "moderate", avg_price: 95, rating: 4.7, capacity: 12, image_url: "https://images.unsplash.com/photo-1531065208531-4036c0dba3ca?w=900&q=85", short_description: "Pisac, Ollantaytambo, lunch", description: "Full-day tour through the Sacred Valley.", opening_hours: "8:00 AM - 7:00 PM" },
 
-      // LONDON
+      
       { name: "British Museum Highlights Tour", city: "London", country: "United Kingdom", type: "attraction", price_level: "budget", avg_price: 30, rating: 4.8, capacity: 12, image_url: "https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=900&q=85", short_description: "Rosetta Stone, Elgin Marbles, more", description: "2-hour guided highlights tour of the British Museum's most iconic objects.", opening_hours: "10:00 AM - 5:00 PM", featured: true, latitude: 51.519, longitude: -0.127 },
       { name: "The Shard High Tea", city: "London", country: "United Kingdom", type: "restaurant", price_level: "premium", avg_price: 95, rating: 4.6, capacity: 4, image_url: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=900&q=85", short_description: "Afternoon tea on floor 31", description: "Classic British afternoon tea with panoramic skyline views from The Shard.", opening_hours: "12:00 PM - 5:00 PM" },
     ];
@@ -878,7 +851,6 @@ async function seedPlacesIfEmpty() {
   } catch (e) { console.warn('⚠️ Seed error:', e.message); }
 }
 
-// ─── Booking availability check ───────────────────────────────────────────────
 app.get('/api/bookings/availability', authMiddleware, async (req, res) => {
   try {
     const { place_id, date, time } = req.query;
@@ -899,8 +871,6 @@ app.get('/api/bookings/availability', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Trip routes ──────────────────────────────────────────────────────────────
-// Trips own a date range; bookings within them sit on a specific calendar day.
 app.get('/api/trips', authMiddleware, async (req, res) => {
   try {
     const trips = await Trip.find({ created_by: req.userEmail }).sort({ start_date: -1 }).lean();
@@ -927,7 +897,7 @@ app.post('/api/trips', authMiddleware, async (req, res) => {
     start_date = isoDate(start_date); end_date = isoDate(end_date);
     if (start_date > end_date) return res.status(400).json({ error: 'End date must be on or after the start date' });
 
-    // Date conflict check: any non-cancelled trip overlapping this range
+    
     const overlapping = await Trip.findOne({
       created_by: req.userEmail,
       status: { $in: ['planned', 'active', 'completed'] },
@@ -941,7 +911,7 @@ app.post('/api/trips', authMiddleware, async (req, res) => {
       });
     }
 
-    // 24h cooldown: cannot rebook same dest+date range that was cancelled in the last 24h
+    
     const recentCancel = await Trip.findOne({
       created_by: req.userEmail,
       status: 'cancelled',
@@ -973,7 +943,7 @@ app.patch('/api/trips/:id', authMiddleware, async (req, res) => {
     if (updates.end_date) updates.end_date = isoDate(updates.end_date);
     if (updates.start_date && updates.end_date && updates.start_date > updates.end_date) return res.status(400).json({ error: 'End date must be on or after the start date' });
 
-    // If dates change, re-check conflicts
+    
     if (updates.start_date || updates.end_date) {
       const newStart = updates.start_date || trip.start_date;
       const newEnd = updates.end_date || trip.end_date;
@@ -1003,7 +973,7 @@ app.delete('/api/trips/:id', authMiddleware, async (req, res) => {
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).json({ error: 'Trip not found' });
     if (trip.created_by !== req.userEmail) return res.status(403).json({ error: 'Forbidden' });
-    // Soft-cancel by default to preserve history; pass ?hard=1 to delete
+    
     if (req.query.hard) {
       await Booking.deleteMany({ created_by: req.userEmail, trip_id: trip._id.toString() });
       await Trip.findByIdAndDelete(trip._id);
@@ -1011,14 +981,13 @@ app.delete('/api/trips/:id', authMiddleware, async (req, res) => {
       trip.status = 'cancelled';
       trip.cancelled_at = new Date();
       await trip.save();
-      // Cancel its child bookings too
+      
       await Booking.updateMany({ created_by: req.userEmail, trip_id: trip._id.toString(), status: { $in: ['confirmed', 'pending'] } }, { $set: { status: 'cancelled', updated_date: new Date() } });
     }
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Booking routes (trip-aware) ──────────────────────────────────────────────
 app.get('/api/bookings', authMiddleware, async (req, res) => {
   try {
     const filter = { created_by: req.userEmail };
@@ -1044,7 +1013,7 @@ app.post('/api/bookings', authMiddleware, async (req, res) => {
     if (!body.place_name || !body.booking_date) return res.status(400).json({ error: 'place_name and booking_date are required' });
     const booking_date = isoDate(body.booking_date);
 
-    // If trip_id supplied, ensure date is within the trip window
+    
     if (body.trip_id) {
       const trip = await Trip.findById(body.trip_id);
       if (!trip || trip.created_by !== req.userEmail) return res.status(400).json({ error: 'Invalid trip' });
@@ -1053,7 +1022,7 @@ app.post('/api/bookings', authMiddleware, async (req, res) => {
       }
     }
 
-    // Duplicate prevention: same user, same place, same date, not cancelled
+    
     if (body.place_id || body.place_name) {
       const dup = await Booking.findOne({
         created_by: req.userEmail,
@@ -1071,8 +1040,8 @@ app.post('/api/bookings', authMiddleware, async (req, res) => {
       ...body, booking_date, created_by: req.userEmail,
       created_date: new Date(), updated_date: new Date(),
     });
-    // Only award points for bookings that are immediately confirmed (free bookings).
-    // Paid/pending bookings get their points when payment verifies (see /api/booking/verify).
+    
+    
     if ((doc.status || '').toLowerCase() === 'confirmed') {
       awardPoints(req.userEmail, 25, 'Booking added to trip', { booking_id: doc._id.toString(), place_name: body.place_name });
     }
@@ -1096,13 +1065,11 @@ app.delete('/api/bookings/:id', authMiddleware, async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Trip lifecycle sweep — runs every hour. Awards +100 when start_date passes
-// and +200 when end_date passes (each at most once per trip).
 async function sweepTripLifecycle() {
   try {
     const today = todayISO();
 
-    // Started: trips whose start <= today and not yet awarded
+    
     const started = await Trip.find({ status: { $in: ['planned', 'active', 'completed'] }, start_date: { $lte: today }, points_started_awarded: false });
     for (const t of started) {
       t.points_started_awarded = true;
@@ -1112,7 +1079,7 @@ async function sweepTripLifecycle() {
       Notification.create({ created_by: t.created_by, title: 'Trip started!', message: 'Your trip to ' + t.destination_country + ' has begun. Have a great time! (+100 pts)', type: 'trip_reminder', link: '/bookings' }).catch(() => { });
     }
 
-    // Completed: trips whose end < today and not yet awarded
+    
     const ended = await Trip.find({ status: { $in: ['planned', 'active', 'completed'] }, end_date: { $lt: today }, points_completed_awarded: false });
     for (const t of ended) {
       t.points_completed_awarded = true;
@@ -1124,9 +1091,8 @@ async function sweepTripLifecycle() {
   } catch (e) { console.warn('Trip lifecycle sweep error:', e.message); }
 }
 setInterval(sweepTripLifecycle, 60 * 60 * 1000);
-setTimeout(sweepTripLifecycle, 5000);  // also run shortly after boot
+setTimeout(sweepTripLifecycle, 5000);  
 
-// ─── Stripe billing ───────────────────────────────────────────────────────────
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 const STRIPE_PRICE_MEDIUM = process.env.STRIPE_PRICE_MEDIUM || '';
@@ -1165,10 +1131,10 @@ app.post('/api/billing/checkout', authMiddleware, async (req, res) => {
       customer: customerId,
       line_items: [{ price: PLAN_TO_PRICE[plan], quantity: 1 }],
       discounts: coupon ? [{ coupon }] : undefined,
-      // Stripe replaces {CHECKOUT_SESSION_ID} with the real session ID in the
-      // redirect URL — we use that on the pricing page to verify the payment
-      // server-side and upgrade the plan immediately, so we don't have to rely
-      // on the webhook firing in local dev.
+      
+      
+      
+      
       success_url: APP_URL + '/pricing?status=success&session_id={CHECKOUT_SESSION_ID}',
       cancel_url: APP_URL + '/pricing?status=cancelled',
       metadata: { user_id: req.userId, plan },
@@ -1177,9 +1143,6 @@ app.post('/api/billing/checkout', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Verify a completed Checkout session and upgrade the user's plan.
-// Called from the frontend after a Stripe success redirect — works even
-// without a webhook configured (great for local dev / Stripe sandbox).
 app.post('/api/billing/verify', authMiddleware, async (req, res) => {
   try {
     if (!stripe) return res.status(503).json({ error: 'Stripe not configured' });
@@ -1189,8 +1152,8 @@ app.post('/api/billing/verify', authMiddleware, async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(session_id, { expand: ['subscription'] });
     if (!session) return res.status(404).json({ error: 'Session not found' });
 
-    // Only honor sessions whose metadata user_id matches the caller — prevents
-    // anyone from upgrading another user's plan by guessing a session ID.
+    
+    
     if (session.metadata?.user_id !== req.userId) {
       return res.status(403).json({ error: 'Session does not belong to this user' });
     }
@@ -1202,8 +1165,8 @@ app.post('/api/billing/verify', authMiddleware, async (req, res) => {
       return res.status(409).json({ error: 'Payment not completed yet', payment_status: session.payment_status });
     }
 
-    // Determine when the membership runs out. For a subscription, use the
-    // subscription's current_period_end if available; otherwise default to +1 month.
+    
+    
     let until = new Date(); until.setMonth(until.getMonth() + 1);
     let subId = '';
     if (session.subscription) {
@@ -1217,7 +1180,7 @@ app.post('/api/billing/verify', authMiddleware, async (req, res) => {
     if (!u) return res.status(404).json({ error: 'User not found' });
     u.membership = plan;
     u.membership_until = until;
-    u.trial_active = false;  // Deactivate trial once user has a paid subscription
+    u.trial_active = false;  
     if (subId) u.stripe_subscription_id = subId;
     await u.save();
 
@@ -1243,10 +1206,6 @@ app.post('/api/billing/portal', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Booking payment ──────────────────────────────────────────────────────────
-// One-time Stripe checkout for a single booking. The booking is stored as
-// pending=true&status=pending, and only flipped to confirmed after the user
-// returns from a successful Stripe checkout (verified server-side).
 app.post('/api/booking/checkout', authMiddleware, async (req, res) => {
   try {
     if (!stripe) return res.status(503).json({ error: 'Stripe not configured', contact: true });
@@ -1268,8 +1227,8 @@ app.post('/api/booking/checkout', authMiddleware, async (req, res) => {
       await u.save();
     }
 
-    // Stripe charges integers in the smallest unit. AED has 2 decimals, so
-    // multiply by 100. We charge in AED to match the platform's pricing currency.
+    
+    
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer: customerId,
@@ -1289,7 +1248,7 @@ app.post('/api/booking/checkout', authMiddleware, async (req, res) => {
       metadata: { user_id: req.userId, booking_id: b._id.toString(), kind: 'booking_payment' },
     });
 
-    // Mark booking as payment-pending so it shows up correctly in the UI
+    
     b.status = 'pending';
     b.payment_status = 'pending';
     b.stripe_session_id = session.id;
@@ -1302,8 +1261,6 @@ app.post('/api/booking/checkout', authMiddleware, async (req, res) => {
   }
 });
 
-// Verify a booking payment session. Same approach as the plan verify endpoint —
-// works without a webhook for local dev / Stripe sandbox.
 app.post('/api/booking/verify', authMiddleware, async (req, res) => {
   try {
     if (!stripe) return res.status(503).json({ error: 'Stripe not configured' });
@@ -1331,8 +1288,8 @@ app.post('/api/booking/verify', authMiddleware, async (req, res) => {
     b.payment_method = 'stripe';
     await b.save();
 
-    // Award the +25 booking points now that the booking is actually paid for.
-    // Avoid double-awards if this endpoint is hit twice for the same booking.
+    
+    
     const already = await PointsLog.findOne({ created_by: req.userEmail, reason: 'Booking added paid', 'meta.booking_id': b._id.toString() });
     if (!already) {
       awardPoints(req.userEmail, 25, 'Booking added paid', { booking_id: b._id.toString(), place_name: b.place_name });
@@ -1369,7 +1326,6 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
   } catch (e) { res.status(500).send(e.message); }
 });
 
-// Public offers config (frontend reads this)
 app.get('/api/billing/offers', (_req, res) => {
   res.json({
     coupons: [
@@ -1381,7 +1337,6 @@ app.get('/api/billing/offers', (_req, res) => {
   });
 });
 
-// ─── Connection-only messaging guard ──────────────────────────────────────────
 async function areConnected(emailA, emailB) {
   const c = await Connection.findOne({
     status: 'accepted',
@@ -1398,7 +1353,6 @@ Message.create = async function (data) {
   return _origMessageCreate(data);
 };
 
-// Public config (safe values exposed to frontend)
 app.get('/api/config/public', (_req, res) => {
   res.json({
     google_client_id: GOOGLE_CLIENT_ID || null,
@@ -1409,15 +1363,14 @@ app.get('/api/config/public', (_req, res) => {
   });
 });
 
-// ─── Weather Route ────────────────────────────────────────────────────────────
 app.get('/api/weather', authMiddleware, async (req, res) => {
   try {
     const rawCity = (req.query.city || 'Dubai').trim();
     const city = rawCity;
 
-    // Common country → capital map. Used when the user types a country name
-    // ("France") rather than a city ("Paris"), since OpenWeatherMap's free
-    // /weather endpoint takes city names and 404s on country-only queries.
+    
+    
+    
     const COUNTRY_TO_CAPITAL = {
       'france': 'Paris', 'japan': 'Tokyo', 'italy': 'Rome', 'spain': 'Madrid', 'germany': 'Berlin',
       'united kingdom': 'London', 'uk': 'London', 'england': 'London', 'greece': 'Athens',
@@ -1441,8 +1394,8 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
       'laos': 'Vientiane', 'taiwan': 'Taipei', 'hong kong': 'Hong Kong',
     };
 
-    // Build the list of city candidates to try. We try the user's input first;
-    // if it 404s and looks like a country name, we silently retry with the capital.
+    
+    
     const candidates = [city];
     const lower = city.toLowerCase();
     if (COUNTRY_TO_CAPITAL[lower] && COUNTRY_TO_CAPITAL[lower].toLowerCase() !== lower) {
@@ -1459,15 +1412,15 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
             used = candidate;
             break;
           }
-          // Treat 404 as "city not found, try next candidate". Other statuses
-          // (401 invalid key, 429 rate-limited, 5xx) get noted and we still try.
+          
+          
           lastError = 'OpenWeatherMap ' + r.status;
         } catch (err) { lastError = err.message; }
       }
 
       if (!w) {
-        // Couldn't find any of the candidate cities. Instead of a 500 error,
-        // gracefully fall through to the mock so the user still sees something.
+        
+        
         console.warn('Weather: ' + lastError + ' for "' + city + '" — falling back to mock data');
       } else {
         const rf = await fetch('https://api.openweathermap.org/data/2.5/forecast?q=' + encodeURIComponent(used) + '&appid=' + OPENWEATHER_API_KEY + '&units=metric&cnt=24');
@@ -1522,9 +1475,9 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
       }
     }
 
-    // Fallback mock (no API key, OR all candidates 404'd)
+    
     const mockTemps = { Dubai: 38, London: 14, Paris: 18, Tokyo: 22, Bali: 30, 'New York': 17, Kyoto: 20, Santorini: 26, Marrakech: 28, Maldives: 31 };
-    // Try the original city, then the mapped capital, then 22°C default
+    
     const mockKey = mockTemps[city] != null ? city : (COUNTRY_TO_CAPITAL[lower] && mockTemps[COUNTRY_TO_CAPITAL[lower]] != null ? COUNTRY_TO_CAPITAL[lower] : null);
     const t = mockKey ? mockTemps[mockKey] : 22;
     return res.json({
@@ -1544,8 +1497,8 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
     });
   } catch (e) {
     console.error('Weather error:', e.message);
-    // Even on unexpected errors, return mock data instead of a 500 — the user
-    // shouldn't see a broken page just because the weather lookup failed.
+    
+    
     return res.json({
       city: req.query.city || 'Unknown', source: 'mock-fallback', error: e.message,
       current: { temperature: '22°C', conditions: 'Partly Cloudy', humidity: '60%', wind: '10 km/h', feels_like: '21°C' },
@@ -1561,9 +1514,6 @@ app.get('/api/weather', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Entity Routes ────────────────────────────────────────────────────────────
-// Note: Trip and Booking have dedicated handlers above; the remaining entities
-// use the generic CRUD factory.
 app.use('/api/entities/Connection', entityRouter('Connection'));
 app.use('/api/entities/Itinerary', entityRouter('Itinerary'));
 app.use('/api/entities/Message', entityRouter('Message'));
@@ -1573,7 +1523,6 @@ app.use('/api/entities/Subscription', entityRouter('Subscription'));
 app.use('/api/entities/TripInvite', entityRouter('TripInvite'));
 app.use('/api/entities/Favorite', entityRouter('Favorite'));
 
-// Booking entity router compat: forward to /api/bookings handlers via mini-router
 const bookingCompat = express.Router();
 bookingCompat.get('/', authMiddleware, async (req, res) => {
   try {
@@ -1635,7 +1584,6 @@ bookingCompat.delete('/:id', authMiddleware, async (req, res) => {
 });
 app.use('/api/entities/Booking', bookingCompat);
 
-// ─── Personalized recommendations ─────────────────────────────────────────────
 app.get('/api/recommendations', authMiddleware, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 12;
@@ -1675,13 +1623,12 @@ app.get('/api/recommendations', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── AI chatbot (Pro plan and above) ─────────────────────────────────────────
 app.post('/api/ai/chat', authMiddleware, requirePlan('medium'), async (req, res) => {
   try {
     const { messages = [], system } = req.body;
     const u = req.user;
 
-    // If user has an active or upcoming trip, mention it in the system prompt
+    
     const today = todayISO();
     const trip = await Trip.findOne({
       created_by: u.email,
@@ -1711,7 +1658,7 @@ app.post('/api/ai/chat', authMiddleware, requirePlan('medium'), async (req, res)
       let errBody = '';
       try { errBody = await r.text(); } catch (_) { }
       console.warn('Groq chat error:', r.status, errBody.slice(0, 400));
-      // Graceful mock fallback so the user always gets a reply
+      
       const lastUserMsg = (history.slice().reverse().find(m => m.role === 'user') || {}).content || '';
       return res.json({ reply: mockChatReply(lastUserMsg, u, activeTrip) });
     }
@@ -1733,7 +1680,6 @@ function mockChatReply(text, user, trip) {
   return 'Great question! Try the Planner for full itineraries or Weather for live conditions.' + tripStr;
 }
 
-// ─── Photos (Unsplash with key OR keyless source.unsplash.com fallback) ──────
 app.get('/api/photos', authMiddleware, async (req, res) => {
   try {
     const query = req.query.query || 'travel';
@@ -1757,9 +1703,9 @@ app.get('/api/photos', authMiddleware, async (req, res) => {
       }
     }
 
-    // Keyless fallback: source.unsplash.com gives back a relevant photo for any
-    // query string with no API key required. We synthesise distinct URLs by
-    // adding a sig param so the browser sees them as different images.
+    
+    
+    
     const slug = encodeURIComponent(query.replace(/\s+/g, ' ').trim());
     const photos = [];
     for (let i = 0; i < count; i++) {
@@ -1775,7 +1721,6 @@ app.get('/api/photos', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Single-photo helper (for photo-by-photo lazy loads)
 app.get('/api/photo', authMiddleware, async (req, res) => {
   try {
     const query = req.query.query || 'travel';
@@ -1799,7 +1744,6 @@ app.get('/api/photo', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Country basic info ───────────────────────────────────────────────────────
 app.get('/api/country', authMiddleware, async (req, res) => {
   try {
     const name = req.query.name || 'France';
@@ -1846,7 +1790,6 @@ function bestTimeFor(region, subregion) {
   return mapping[subregion] || mapping[region] || 'Year-round';
 }
 
-// ─── Country Places (AI-powered: REAL named places only) ──────────────────────
 app.get('/api/country-places', authMiddleware, async (req, res) => {
   try {
     const country = req.query.country || 'France';
@@ -1899,20 +1842,19 @@ app.get('/api/country-places', authMiddleware, async (req, res) => {
           return res.json(parsed);
         } catch (pe) { console.error('Country places parse fail:', pe.message, text.slice(0, 300)); }
       } else {
-        // Log the full Groq error body so model decommissions / quota issues
-        // are visible in the server logs instead of just a status code.
+        
+        
         let errBody = '';
         try { errBody = await r.text(); } catch (_) { }
         console.warn('Groq country-places error:', r.status, errBody.slice(0, 400));
       }
     }
 
-    // Fallback: hard-coded real places for popular countries, generic-but-named for the rest
+    
     res.json(fallbackCountryPlaces(country));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Hard-coded REAL named places per popular country, for when Groq is unavailable.
 function fallbackCountryPlaces(country) {
   const dataMap = {
     'France': {
@@ -2101,7 +2043,7 @@ function fallbackCountryPlaces(country) {
     },
   };
   if (dataMap[country]) return dataMap[country];
-  // Generic fallback when we don't have hard-coded entries — at least mention real cities by name where possible
+  
   return {
     overview: country + ' is a wonderful destination with rich culture and breathtaking landscapes.',
     highlights: ['Historic sites', 'Local cuisine', 'Natural beauty', 'Warm hospitality', 'Unique traditions'],
@@ -2128,7 +2070,6 @@ function fallbackCountryPlaces(country) {
   };
 }
 
-// ─── Places search (DB first, AI fallback) ───────────────────────────────────
 app.get('/api/places/search', authMiddleware, async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
@@ -2144,15 +2085,15 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
     const dbItems = await Place.find(filter).sort({ featured: -1, rating: -1 }).limit(limit).lean();
     const dbMapped = dbItems.map(p => { p.id = p._id.toString(); delete p._id; delete p.__v; return p; });
 
-    // No query — just return whatever's in the DB.
+    
     if (!q) {
       return res.json({ items: dbMapped, source: 'db' });
     }
 
-    // We have a query. If the DB returned a healthy number of matches,
-    // ship them as-is. Otherwise top-up with AI-generated samples so the
-    // user always sees a rich set of real, named places for the searched
-    // city/country.
+    
+    
+    
+    
     const MIN_RESULTS = 6;
     if (dbMapped.length >= MIN_RESULTS) {
       return res.json({ items: dbMapped, source: 'db' });
@@ -2180,13 +2121,13 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
           try {
             parsed = JSON.parse(clean);
           } catch (jsonErr) {
-            // AI response was cut off — rescue complete items only
+            
             const lastBracket = clean.lastIndexOf('}');
             const rescued = clean.slice(0, lastBracket + 1) + ']}';
             try {
               parsed = JSON.parse(rescued);
             } catch (_) {
-              throw jsonErr; // still broken, let outer catch handle it
+              throw jsonErr; 
             }
           }
           const aiItems = (parsed.items || []).map((p, i) => ({
@@ -2196,10 +2137,10 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
             tags: [p.type || 'attraction', p.price_level || 'moderate'], _aiUnsplashQuery: p.unsplash_query || (p.name + ' ' + (p.city || '') + ' ' + (p.country || '')),
             _ai: true,
           }));
-          // De-dupe AI results that already exist in DB by name (case-insensitive)
+          
           const dbNames = new Set(dbMapped.map(p => String(p.name || '').toLowerCase()));
           const filteredAi = aiItems.filter(p => !dbNames.has(String(p.name).toLowerCase()));
-          // Combine: DB results first, then AI fillers.
+          
           const merged = dbMapped.concat(filteredAi);
           return res.json({
             items: merged,
@@ -2213,12 +2154,11 @@ app.get('/api/places/search', authMiddleware, async (req, res) => {
       } catch (e) { console.warn('places search ai fail', e.message); }
     }
 
-    // AI not configured or failed → return whatever the DB had (possibly empty).
+    
     res.json({ items: dbMapped, source: 'db' });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ─── Serve vanilla HTML/CSS/JS frontend ──────────────────────────────────────
 const frontendPublic = path.join(__dirname, '../frontend/public');
 if (fs.existsSync(frontendPublic)) {
   app.use(express.static(frontendPublic, { extensions: ['html'] }));
@@ -2236,14 +2176,12 @@ if (fs.existsSync(frontendPublic)) {
   });
 }
 
-// Top-level error handler so the server never crashes
 app.use((err, _req, res, _next) => {
   console.error('UNHANDLED:', err);
   res.status(err.status || 500).json({ error: err.message || 'Server error' });
 });
 process.on('unhandledRejection', e => console.error('UNHANDLED REJECTION', e));
 
-// ─── Start ────────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log('\nExploreX          →  http://localhost:' + PORT);
   console.log('AI Features       →  ' + (GROQ_API_KEY ? 'Enabled (Groq)' : 'Disabled (set GROQ_API_KEY)'));

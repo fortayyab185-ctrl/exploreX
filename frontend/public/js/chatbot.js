@@ -1,15 +1,11 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX Travel Assistant — floating chatbot widget
-   - Renders on every app page automatically (depends on app.js)
-   - Visible to Pro+ plan users; Free users see an upgrade nudge
-   - Conversation persisted in localStorage per user
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
   function init(user) {
     if (!user) return;
-    if (document.getElementById('travel-bot-fab')) return; // don't double-mount
+    if (document.getElementById('travel-bot-fab')) return; 
 
     const isMember = window.db.hasPlan(user, 'medium');
 
@@ -137,7 +133,7 @@
     return (s || '').replace(/[&<>"\']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   }
 
-  // Trial start from gate
+  
   document.addEventListener('click', async (e) => {
     if (e.target && e.target.id === 'tb-trial') {
       try {
@@ -148,6 +144,6 @@
     }
   });
 
-  // Boot once app:ready fires (every app page dispatches this)
+  
   document.addEventListener('app:ready', (e) => init(e.detail.user));
 })();

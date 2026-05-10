@@ -1,10 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ExploreX — Globe (Three.js)
-   Real-Earth blue-marble texture + bump/specular maps, brighter lighting.
-   Country markers = white glowing pin-spikes (thin cones pointing outward),
-   no colored dots, no halos, only a subtle opacity pulse.
-   Click a pin → fly camera + open the side panel with country data + AI places.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -169,7 +164,7 @@
     else if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
-    /* ── Lighting — soft, even, matte. No specular glare. ─── */
+    
     scene.add(new THREE.AmbientLight(0xfff5e8, 1.55));
     const key = new THREE.DirectionalLight(0xffe9c8, 1.4);
     key.position.set(-2.5, 2, 4);
@@ -179,7 +174,7 @@
     scene.add(fill);
     scene.add(new THREE.HemisphereLight(0xfff0d6, 0xeaf2ff, 0.55));
 
-    /* ── Earth: natural-color PBR with bump & water-roughness, no specular glare ─── */
+    
     const loader = new THREE.TextureLoader();
     loader.crossOrigin = 'anonymous';
 
@@ -211,12 +206,8 @@
     );
     scene.add(earthMesh);
 
-    /* ── Country highlight overlay ──────────────────────────────────────────
-       A second sphere, slightly larger than Earth, with a transparent canvas
-       texture. We draw the GeoJSON country polygons onto the canvas in
-       equirectangular projection, with the hovered country filled in teal.
-       This is the trick that makes "country highlight on hover" possible
-       without any extra 3D libraries — just a 2D canvas synced to a sphere. */
+    
+
     const overlayCanvas = document.createElement('canvas');
     overlayCanvas.width  = 2048;
     overlayCanvas.height = 1024;
@@ -228,7 +219,7 @@
     else if (THREE.sRGBEncoding !== undefined) overlayTexture.encoding = THREE.sRGBEncoding;
 
     const overlayMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(RADIUS * 1.002, 128, 128),  // a hair bigger so it sits on top
+      new THREE.SphereGeometry(RADIUS * 1.002, 128, 128),  
       new THREE.MeshBasicMaterial({
         map: overlayTexture,
         transparent: true,
@@ -237,10 +228,10 @@
     );
     scene.add(overlayMesh);
 
-    // Stash for later redraw on hover
+    
     earthMesh.userData.overlay = { canvas: overlayCanvas, ctx: overlayCtx, texture: overlayTexture };
 
-    /* Atmosphere — soft pale blue, low intensity */
+    
     const atmoMat = new THREE.ShaderMaterial({
       transparent: true, side: THREE.BackSide, depthWrite: false,
       uniforms: { c: { value: 0.6 }, p: { value: 5.5 }, glowColor: { value: new THREE.Color(0xa8c8e8) } },
@@ -249,7 +240,7 @@
     });
     scene.add(new THREE.Mesh(new THREE.SphereGeometry(RADIUS * 1.045, 64, 64), atmoMat));
 
-    /* ── Load country polygons (GeoJSON) and pre-render the overlay ─── */
+    
     const COUNTRIES_GEOJSON_URL =
       'https://raw.githubusercontent.com/vasturiano/three-globe/master/example/country-polygons/ne_110m_admin_0_countries.geojson';
     fetch(COUNTRIES_GEOJSON_URL)
@@ -257,7 +248,7 @@
       .then(geo => { countriesGeoJSON = geo; redrawOverlay(); })
       .catch(err => console.warn('Could not load country polygons:', err));
 
-    /* Stars */
+    
     const starsGeo = new THREE.BufferGeometry();
     const starPos = new Float32Array(2000 * 3);
     for (let i = 0; i < 2000; i++) {
@@ -271,7 +262,7 @@
     starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
     scene.add(new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.1, transparent: true, opacity: 0.6 })));
 
-    /* Controls */
+    
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping   = true;
     controls.dampingFactor   = 0.06;
@@ -312,8 +303,8 @@
     renderer.setSize(c.clientWidth, c.clientHeight);
   }
 
-  /* ── Hit-test against the globe sphere, then locate which country
-       polygon contains the lat/lng under the cursor. ─── */
+  
+
   function pickCountryAt(clientX, clientY) {
     if (!countriesGeoJSON || !earthMesh) return null;
     const rect = renderer.domElement.getBoundingClientRect();
@@ -321,16 +312,16 @@
     mouse.y = -((clientY - rect.top)  / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
 
-    // Raycast against the Earth sphere itself
+    
     const hits = raycaster.intersectObject(earthMesh, false);
     if (!hits.length) return null;
 
-    // Convert the world-space hit into lat/lng
+    
     const localPt = earthMesh.worldToLocal(hits[0].point.clone()).normalize();
-    // Sphere geometry mapping: phi = (90 - lat) * deg, theta = (lng + 180) * deg
-    //   x = -sin(phi)*cos(theta)
-    //   y =  cos(phi)
-    //   z =  sin(phi)*sin(theta)
+    
+    
+    
+    
     const lat = 90 - Math.acos(Math.max(-1, Math.min(1, localPt.y))) * 180 / Math.PI;
     const lng = ((Math.atan2(localPt.z, -localPt.x) * 180 / Math.PI) - 180 + 540) % 360 - 180;
 
@@ -345,7 +336,7 @@
     return false;
   }
   function pointInPolygon(pt, rings) {
-    // Outer ring at index 0; inner rings (holes) at 1..n.
+    
     if (!pointInRing(pt, rings[0])) return false;
     for (let i = 1; i < rings.length; i++) {
       if (pointInRing(pt, rings[i])) return false;
@@ -368,8 +359,8 @@
     if (hoveredFeature === feature) return;
     hoveredFeature = feature;
     redrawOverlay();
-    // Pause auto-rotation while a country is being hovered. Resume when
-    // hover clears, unless a country is selected (modal/scene open).
+    
+    
     if (controls) {
       if (feature) {
         controls.autoRotate = false;
@@ -390,12 +381,8 @@
     }
   }
 
-  /* ── Redraw the country-overlay canvas. Empty by default; the hovered
-       country is filled with a soft teal tint. Equirectangular projection:
-       x = (lng + 180) / 360 * width
-       y = (90 - lat)  / 180 * height
-       Note we render every frame as a fresh canvas (no transparency layering)
-       so the overlay stays sharp. ─── */
+  
+
   function redrawOverlay() {
     if (!earthMesh || !earthMesh.userData.overlay) return;
     const { canvas, ctx, texture } = earthMesh.userData.overlay;
@@ -408,7 +395,7 @@
       ctx.lineWidth   = 2;
       ctx.lineJoin    = 'round';
       const drawPoly = (poly) => {
-        // poly is [outerRing, hole1, hole2, …]
+        
         ctx.beginPath();
         poly.forEach((ring) => {
           ring.forEach(([lng, lat], i) => {
@@ -434,7 +421,7 @@
   function onCanvasMove(e) {
     const tip = document.getElementById('country-tooltip');
     if (tip) {
-      // Position tooltip relative to the globe-canvas container (its parent)
+      
       const rect = renderer.domElement.getBoundingClientRect();
       const parentRect = tip.parentElement.getBoundingClientRect();
       tip.style.left = (e.clientX - parentRect.left) + 'px';
@@ -447,7 +434,7 @@
   function onCanvasClick(e) {
     const f = pickCountryAt(e.clientX, e.clientY);
     if (!f) return;
-    // Match the GeoJSON feature against our COUNTRIES list (by name).
+    
     const name = (f.properties && (f.properties.NAME || f.properties.ADMIN || f.properties.name)) || '';
     const c = COUNTRIES.find(x => sameName(x.name, name)) || guessFallbackCountry(name);
     if (c) selectCountry(c);
@@ -458,7 +445,7 @@
     const norm = s => String(s).toLowerCase().replace(/[^a-z]/g, '');
     return norm(a) === norm(b);
   }
-  // Friendly aliases so a few well-known country naming differences still work.
+  
   function guessFallbackCountry(name) {
     const ALIASES = {
       'United States of America': 'USA',
@@ -487,7 +474,7 @@
     renderer.render(scene, camera);
   }
 
-  /* ── Country select / camera fly + side panel ────────────────────────── */
+  
   function selectCountry(country) {
     activeCountry = country;
     controls.autoRotate = false;
@@ -536,7 +523,7 @@
     }));
   }
 
-  /* ── Side panel rendering ────────────────────────────────────────────── */
+  
   function renderCountryPanel(country) {
     const panel = document.getElementById('dest-panel');
     panel.innerHTML =
@@ -585,7 +572,7 @@
           if (window.lucide) lucide.createIcons();
         }
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
   }
 
   async function loadCountryPlaces(country) {
@@ -615,7 +602,7 @@
 
     html += '<div class="divider"></div>';
 
-    // Action buttons — links to Weather / Planner / Booking pre-filled with country
+    
     html += '<div class="actions">' +
       '<a class="act-btn act-grad" href="/weather?city=' + encodeURIComponent(country.name) + '" style="background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);border:1px solid var(--teal-25)"><i data-lucide="cloud-sun" style="width:14px;height:14px"></i> Weather</a>' +
       '<a class="act-btn act-line" href="/planner?city=' + encodeURIComponent(country.name) + '"><i data-lucide="sparkles" style="width:14px;height:14px"></i> AI Plan a Trip</a>' +
@@ -682,7 +669,7 @@
             if (icon) icon.style.display = 'none';
           };
         }
-      } catch (e) { /* keep icon */ }
+      } catch (e) {  }
     }
   }
 

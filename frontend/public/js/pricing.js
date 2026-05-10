@@ -1,6 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /pricing — plans, trial, seasonal offer, rewards.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -9,21 +8,21 @@
   document.addEventListener('app:ready', async (e) => {
     me = e.detail.user;
 
-    // If we just returned from a successful Stripe checkout, verify it server-side
-    // and upgrade the plan immediately. This works even without a webhook configured.
+    
+    
     const params = new URLSearchParams(location.search);
     if (params.get('status') === 'success' && params.get('session_id')) {
       try {
         const result = await window.db.billing.verify(params.get('session_id'));
         if (result && result.ok) {
           toast.success(result.message || 'Plan upgraded!');
-          // Reload user info so UI shows new plan
+          
           try { me = await window.db.auth.me(); window.currentUser = me; } catch (_) {}
         }
       } catch (err) {
         toast.error('Could not verify payment: ' + err.message);
       }
-      // Clean up the URL so a refresh doesn't re-verify
+      
       history.replaceState({}, '', '/pricing');
     } else if (params.get('status') === 'cancelled') {
       toast.info('Checkout cancelled — you can subscribe anytime.');
@@ -144,7 +143,7 @@
           '<a href="/profile" class="btn btn-outline">' + (have >= t.cost ? 'Redeem' : 'View') + '</a>' +
         '</div>'
       ).join('');
-    } catch (e) { /* ignore */ }
+    } catch (e) {  }
   }
 
   function escapeHtml(s) {

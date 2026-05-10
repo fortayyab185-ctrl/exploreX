@@ -1,10 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   AI Planner — Max plan
-   Generates itineraries that reference REAL named places only.
-   - Each activity ships with a photo loaded from /api/photo
-   - "Add to bookings" attaches each activity into the user's chosen trip
-     (or as standalone bookings if no trip is selected).
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -135,7 +130,7 @@
     out.innerHTML = '<div class="text-center" style="padding:3rem"><div class="spinner spinner-lg" style="margin:0 auto"></div><p class="text-muted text-sm" style="margin-top:1rem">Asking the AI…</p></div>';
 
     try {
-      // Strict prompt: REAL named places only. The schema enforces specific fields.
+      
       const prompt =
         'You are a professional travel planner. Generate a real itinerary for ' + city + ' starting ' + date + '.\n' +
         'Trip duration: ' + days + ' day(s). Budget: ' + budget + '. Interests: ' + (prefs || 'general sightseeing') + '.\n\n' +
@@ -162,7 +157,7 @@
       lastResult = Object.assign({}, result, { city, date, budget });
       renderResult(lastResult);
 
-      // Save it
+      
       try {
         await db.entities.Itinerary.create({
           title: result.title || ('Trip to ' + city),
@@ -202,7 +197,7 @@
     document.getElementById('re-roll').addEventListener('click', () => generate());
     document.getElementById('add-bookings').addEventListener('click', () => addAllToBookings(it));
 
-    // Lazily load a photo per activity
+    
     (it.activities || []).forEach(async (a, i) => {
       const img = document.querySelector('[data-act-img="' + i + '"]');
       if (!img) return;
@@ -242,13 +237,13 @@
     const acts = (it.activities || []).filter(a => a.activity && a.location);
     if (!acts.length) return toast.error('Nothing to book', { title: 'Empty plan' });
 
-    // Compute a single-day trip out of the itinerary date.
+    
     const tripStart = it.date;
     const days = +(it.days || 1) || 1;
     const endDate = new Date(it.date); endDate.setDate(endDate.getDate() + Math.max(0, days - 1));
     const tripEnd = endDate.toISOString().slice(0, 10);
 
-    // Derive country/city from the form input string ("Paris" / "Paris, France").
+    
     const cityRaw = (it.city || '').trim();
     let destCity = cityRaw, destCountry = cityRaw;
     if (cityRaw.indexOf(',') !== -1) {
@@ -257,7 +252,7 @@
     }
     const totalCost = acts.reduce((s, a) => s + (+a.price_per_person || 0), 0);
 
-    // Confirm with the user before we go through the multi-step flow.
+    
     const confirmed = await window.confirmModal({
       title: 'Turn this plan into a trip?',
       message: 'A new trip to ' + destCity + ' on ' + tripStart + ' will be created with ' + acts.length + ' booking(s)' + (totalCost > 0 ? ', total AED ' + totalCost + '.' : '.'),
@@ -267,7 +262,7 @@
 
     const loading = toast.loading('Setting up your trip…', { title: 'One moment' });
 
-    // Step 1 — Try to find an existing trip whose window contains the date.
+    
     let trip_id = '', tripName = '';
     let createdTripId = '';
     try {
@@ -281,10 +276,10 @@
       }
     } catch (e) {}
 
-    // Step 2 — No matching trip → create one from the itinerary.
+    
     if (!trip_id) {
       try {
-        // Try to fetch a cover photo, but don't block the flow if it fails.
+        
         let cover_image = '';
         try {
           const ph = await window.db.integrations.photo(destCity + ' ' + destCountry);
@@ -313,7 +308,7 @@
       }
     }
 
-    // Step 3 — Add each activity as a booking inside the trip.
+    
     let ok = 0, dup = 0, err = 0;
     const created = [];
     for (const a of acts) {
@@ -326,8 +321,8 @@
           booking_time: a.time,
           guests: 1,
           notes:  a.description,
-          // Free activities confirm immediately; paid ones stay 'confirmed'
-          // when no Stripe is available, otherwise 'pending' until payment.
+          
+          
           status: 'confirmed',
           payment_status: price > 0 ? 'unpaid' : 'free',
           total_price: price,
@@ -345,24 +340,24 @@
 
     loading.dismiss();
 
-    // If nothing succeeded and we just created an empty trip, clean it up.
+    
     if (ok === 0 && createdTripId) {
       try { await window.db.trips.cancel(createdTripId); } catch (e) {}
       toast.error(err + ' could not be added' + (dup ? ', ' + dup + ' already booked' : ''), { title: 'No activities saved' });
       return;
     }
 
-    // Step 4 — If the trip has a real total and Stripe is configured, take payment now.
+    
     let cfg = {};
     try { cfg = await window.db.integrations.publicConfig(); } catch (e) {}
     const stripeEnabled = !!(cfg && cfg.has_stripe);
 
     if (totalCost > 0 && stripeEnabled) {
-      // Take a single payment for the whole plan via the first paid booking,
-      // then mark sibling bookings paid in a follow-up step on the bookings page.
-      // Simpler approach: pay the first paid booking and inform the user the
-      // rest are confirmed without payment for this iteration. Better UX is
-      // to chain payments — for now we keep the model simple per spec.
+      
+      
+      
+      
+      
       const firstPayable = created.find(b => (b.total_price || 0) > 0);
       if (firstPayable) {
         toast.show({
@@ -372,8 +367,8 @@
           duration: 2500,
         });
         try {
-          // Update its total to cover all paid activities so a single charge
-          // captures the whole plan cost.
+          
+          
           await db.entities.Booking.update(firstPayable.id, {
             total_price: totalCost,
             place_name:  (it.title || tripName) + ' — full plan',
@@ -390,7 +385,7 @@
       }
     }
 
-    // Final success toast with a "View trip" CTA encoded in the message.
+    
     if (ok) {
       toast.success(
         ok + ' activit' + (ok === 1 ? 'y' : 'ies') + ' saved to ' + (tripName || 'your trip') +

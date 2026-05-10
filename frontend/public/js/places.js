@@ -1,11 +1,5 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   /places — search, filter, browse and book places
-   - Hero search by city/country/keyword
-   - Tabs: All | Restaurants | Attractions | Events | Hotels
-   - Detail modal with photos carousel and "Book Now"
-   - Distance in km via geolocation
-   - Falls back to AI-generated places when DB has no results for the query
-   ═══════════════════════════════════════════════════════════════════════════ */
+
+
 (function () {
   'use strict';
 
@@ -59,17 +53,17 @@
       document.getElementById('places-geo-banner').classList.add('hidden');
       return;
     }
-    // If the user enabled auto-geo in preferences, request silently without
-    // showing the banner. Otherwise show the soft prompt for explicit consent.
+    
+    
     const prefs = window.userPreferences || {};
     if (prefs.auto_geo) {
-      // Try silently; if denied we'll just hide the banner.
+      
       window.db.geo.request().then(loc => {
         userLoc = loc;
         document.getElementById('places-geo-banner').classList.add('hidden');
         render();
       }).catch(() => {
-        // User declined or the browser blocked — fall back to the manual banner.
+        
         if (sessionStorage.getItem('places_geo_dismissed') !== '1') {
           document.getElementById('places-geo-banner').classList.remove('hidden');
         }
@@ -105,7 +99,7 @@
     try {
       const res = await window.db.integrations.placesSearch(searchQ, typeFilter, 60);
       allPlaces = res.items || [];
-      // Decorate AI items with photos lazily later
+      
       render(res.source);
     } catch (e) {
       out.innerHTML = '<p class="text-muted text-center" style="padding:2rem">' + escapeHtml(e.message) + '</p>';
@@ -116,20 +110,20 @@
     const out = document.getElementById('places-out');
     let list = allPlaces.slice();
 
-    // Apply distance if userLoc
+    
     if (userLoc) {
       list = list.map(p => p.latitude && p.longitude
         ? Object.assign({}, p, { _dist: window.db.geo.haversineKm(userLoc.lat, userLoc.lng, p.latitude, p.longitude) })
         : p);
     }
 
-    // Sort
+    
     list.sort((a, b) => {
       if (sortBy === 'rating')      return (b.rating || 0) - (a.rating || 0);
       if (sortBy === 'distance')    return (a._dist == null ? 1e9 : a._dist) - (b._dist == null ? 1e9 : b._dist);
       if (sortBy === 'price-asc')   return (a.avg_price || 0) - (b.avg_price || 0);
       if (sortBy === 'price-desc')  return (b.avg_price || 0) - (a.avg_price || 0);
-      // featured
+      
       const fa = a.featured ? 1 : 0, fb = b.featured ? 1 : 0;
       if (fa !== fb) return fb - fa;
       return (b.rating || 0) - (a.rating || 0);
@@ -162,7 +156,7 @@
 
     out.querySelectorAll('.pcard').forEach(card => {
       card.addEventListener('click', (e) => {
-        if (e.target.closest('button[data-act="book"]')) return;   // book button bubbles separately
+        if (e.target.closest('button[data-act="book"]')) return;   
         const id = card.dataset.pid;
         const p = list.find(x => x.id === id);
         if (p) openDetail(p);
@@ -175,7 +169,7 @@
       if (p) openBooking(p);
     }));
 
-    // Lazily fetch photos for AI-only items (those without image_url)
+    
     list.forEach(p => {
       if (!p.image_url && p._aiUnsplashQuery) {
         const card = out.querySelector('.pcard[data-pid="' + p.id + '"] img.lazy-img');
@@ -186,7 +180,7 @@
             card.style.display = 'block';
             const skel = card.parentElement.querySelector('.img-skel');
             if (skel) skel.remove();
-            // Keep a reference so detail modal can reuse
+            
             p.image_url = r.url || r.thumb;
           }
         }).catch(() => {});
@@ -231,7 +225,7 @@
     '</div>';
   }
 
-  /* ── Detail modal with photo carousel ───────────────────────────────────── */
+  
   async function openDetail(p) {
     const html =
       '<div class="modal-head"><h2 class="modal-title">' + escapeHtml(p.name) + '</h2><button class="modal-close" data-close>&times;</button></div>' +
@@ -259,19 +253,18 @@
     m.root.querySelector('.modal').classList.add('modal-wide-trip');
     m.root.querySelector('#pd-book').addEventListener('click', () => { m.close(); openBooking(p); });
 
-    // Load 3 photos
+    
     try {
       const res = await window.db.integrations.photos((p.name + ' ' + (p.city || '')).trim(), 3);
       const strip = m.root.querySelector('#pd-photos');
       if (strip && res.photos && res.photos.length) {
         strip.innerHTML = res.photos.slice(0, 3).map(ph => '<div><img src="' + ph.url + '" alt=""></div>').join('');
       }
-    } catch (e) { /* keep skeletons */ }
+    } catch (e) {  }
   }
 
-  /* ── Booking flow ───────────────────────────────────────────────────────
-     Reuses the trip system: booking goes into an existing trip if available,
-     otherwise creates a stand-alone booking with no trip_id. ──────────────── */
+  
+
   async function openBooking(p) {
     let trips = [], cfg = {};
     try { trips = await window.db.trips.list(); } catch (e) { trips = []; }
@@ -304,7 +297,7 @@
         '<div class="field"><label class="field-label">Guests</label><input id="bk-guests" type="number" min="1" max="20" value="2" class="field-input"></div>' +
         '<div class="field"><label class="field-label">Notes (optional)</label><input id="bk-notes" class="field-input" placeholder="Allergies, preferences…"></div>' +
       '</div>' +
-      // Price summary (only shown when there's a payable amount)
+      
       (isPaid
         ? '<div id="bk-price-summary" style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-radius:12px;background:hsla(180,24%,53%,.08);border:1px solid hsla(180,24%,53%,.2);margin-bottom:1rem">' +
             '<div>' +
@@ -345,7 +338,7 @@
     if (tripSel) tripSel.addEventListener('change', syncDateBoundsFromTrip);
     syncDateBoundsFromTrip();
 
-    // Live-update the price summary as guest count changes
+    
     const guestsInput = m.root.querySelector('#bk-guests');
     if (isPaid) {
       const totalText = m.root.querySelector('#bk-total-text');
@@ -371,7 +364,7 @@
       const willCharge = totalPrice > 0 && stripeEnabled;
       const btn = m.root.querySelector('#bk-confirm');
 
-      // Step 1 — Availability check (only for real DB places, not AI-generated stubs)
+      
       if (!p._ai && p.id) {
         btn.disabled = true; btn.textContent = 'Checking availability…';
         const checkToast = toast.loading('Checking availability…', { title: 'One sec' });
@@ -395,7 +388,7 @@
             return;
           }
         } catch (e) {
-          // Availability check failure is non-fatal — proceed but log.
+          
           checkToast.dismiss();
           console.warn('Availability check failed:', e.message);
         }
@@ -409,8 +402,8 @@
         booking_date: date,
         booking_time: time || undefined,
         guests, notes: notes || undefined,
-        // Paid bookings start as 'pending' until Stripe payment confirms.
-        // Free bookings (avg_price = 0) confirm immediately.
+        
+        
         status: willCharge ? 'pending' : 'confirmed',
         payment_status: willCharge ? 'unpaid' : 'free',
         total_price: totalPrice,
@@ -428,7 +421,7 @@
         const created = await window.db.entities.Booking.create(body);
 
         if (willCharge) {
-          // Hand off to Stripe Checkout.
+          
           try {
             const out = await window.db.billing.bookingCheckout(created.id || created._id);
             if (out && out.url) {
@@ -445,7 +438,7 @@
           } catch (err) {
             savingToast.dismiss();
             toast.error(err.message || 'Could not start payment', { title: 'Payment failed' });
-            // Roll back the pending booking so the user isn't left with an orphan.
+            
             try { await window.db.entities.Booking.remove(created.id || created._id); } catch (_) {}
             btn.disabled = false; btn.textContent = ctaLabel;
           }

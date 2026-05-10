@@ -9,21 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 
-<!-- Tailwind — used by the immersive features section -->
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
-<!-- ═══ HERO SLIDER ═══════════════════════════════════════════ -->
 <section id="hero">
-  <!-- Soft cream/teal blob backdrop -->
+  
   <div class="hero-blobs" aria-hidden="true">
     <span class="hero-blob hero-blob-1"></span>
     <span class="hero-blob hero-blob-2"></span>
   </div>
 
   <div class="hero-grid">
-    <!-- LEFT: Headline + paragraph + CTA -->
     <div class="hero-text">
       <p class="hero-eyebrow">For curious wanderers</p>
       <h1 class="hero-headline">
@@ -39,16 +36,16 @@
       </a>
     </div>
 
-    <!-- RIGHT: The airplane window -->
+    
     <div class="hero-window-stage" aria-hidden="true">
       <div class="plane-window">
-        <!-- Outer ring 1 — cabin wall (largest, lightest) -->
+        
         <div class="plane-ring plane-ring-1">
-          <!-- Outer ring 2 — insulation gap -->
+          
           <div class="plane-ring plane-ring-2">
-            <!-- Outer ring 3 — molded plastic frame -->
+            
             <div class="plane-ring plane-ring-3">
-              <!-- Inner glass — where the video plays -->
+              
               <div class="plane-window-glass">
                 <video class="plane-window-video" autoplay loop muted playsinline preload="auto"
                        poster="https://images.pexels.com/videos/855507/free-video-855507.jpg?auto=compress&cs=tinysrgb&h=627&fit=crop&w=1200">
@@ -56,9 +53,9 @@
                   <source src="https://videos.pexels.com/video-files/855507/855507-sd_960_540_25fps.mp4" type="video/mp4" />
                   <source src="https://videos.pexels.com/video-files/3129724/3129724-hd_1920_1080_30fps.mp4" type="video/mp4" />
                 </video>
-                <!-- Plexiglass highlight -->
+                
                 <span class="plane-window-glare"></span>
-                <!-- Subtle inner shadow at edges to mimic curved acrylic depth -->
+                
                 <span class="plane-window-inner-shadow"></span>
               </div>
             </div>
@@ -68,21 +65,14 @@
     </div>
   </div>
 
-  <!-- Top nav -->
+  
   <header class="hero-nav">
     <div class="hero-nav-inner">
       <a href="#hero" class="hero-logo" style="text-decoration:none;">
         <img src="logo.png" alt="ExploreX Logo" class="hero-logo-img" />
         <span class="hero-logo-text"><span class="bx-e">explore</span><span class="bx-x">X</span></span>
       </a>
-      <button class="nav-hamburger" id="navHamburger" aria-label="Menu" onclick="document.getElementById('navMobileMenu').classList.toggle('open')">
-        <span></span><span></span><span></span>
-      </button>
       <div class="hero-nav-actions">
-        <button class="btn-nav-login" onclick="window.location.href='auth.html?mode=login'">Log in</button>
-        <button class="btn-nav-signup" onclick="window.location.href='auth.html'">Sign up</button>
-      </div>
-      <div class="nav-mobile-menu" id="navMobileMenu">
         <button class="btn-nav-login" onclick="window.location.href='auth.html?mode=login'">Log in</button>
         <button class="btn-nav-signup" onclick="window.location.href='auth.html'">Sign up</button>
       </div>
@@ -90,7 +80,6 @@
   </header>
 </section>
 
-<!-- ═══ ABOUT ══════════════════════════════════════════════════ -->
 <section class="about" id="about">
   <div class="about-inner hidden-reveal" id="aboutInner">
     <div class="about-grid">
@@ -124,7 +113,9 @@
       <div class="about-video-wrap">
         <div class="about-video-container" id="videoContainer">
           <div class="about-video-ratio">
-            <video id="aboutVideo" class="about-video" muted loop playsinline></video>
+            <video id="aboutVideo" class="about-video" muted loop playsinline autoplay>
+              <source src="promo video.mp4" type="video/mp4"/>
+            </video>
             <div class="about-placeholder">
               <div class="about-placeholder-grid"></div>
               <p class="about-placeholder-text">Your video here</p>
@@ -169,20 +160,19 @@
   </div>
 </section>
 
-<!-- ═══ IMMERSIVE JOURNEY FEATURES SECTION ════════════════════ -->
 <section id="journey-features" class="relative h-[300vh]">
-    <div class="sticky top-0 h-screen w-full overflow-hidden journey-sticky-wrap">
+    <div class="sticky top-0 h-screen w-full overflow-hidden">
         <div class="absolute inset-0 z-0"></div>
 
-        <div class="relative z-10 h-full max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col md:flex-row journey-content-wrap">
+        <div class="relative z-10 h-full max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col md:flex-row">
 
-        <div class="relative w-full md:w-5/12 h-1/2 md:h-full p-8 md:p-16 flex items-center journey-left-col">
-            <div class="absolute top-6 left-6 md:top-10 md:left-14 z-10 journey-section-header">
+        <div class="relative w-full md:w-5/12 h-1/2 md:h-full p-8 md:p-16 flex items-center">
+            <div class="absolute top-6 left-6 md:top-10 md:left-14 z-10">
               <p style="font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:.55rem;">Our Features</p>
               <h2 style="font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(1.5rem,2.6vw,2.25rem);color:var(--text-1);letter-spacing:-0.02em;line-height:1.1;white-space:nowrap;">The Journey <span style="color:var(--teal-700);">Experience</span></h2>
             </div>
-            <div class="relative w-full h-full max-h-[600px] flex flex-col justify-between py-12 journey-cards-container">
-                <svg class="absolute left-6 md:left-8 top-0 h-full w-24 -z-10 journey-progress-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <div class="relative w-full h-full max-h-[600px] flex flex-col justify-between py-12">
+                <svg class="absolute left-6 md:left-8 top-0 h-full w-24 -z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <path d="M 20 0 C 80 33, -40 66, 20 100" fill="none" stroke="rgba(110,173,173,0.2)" stroke-width="1.2"></path>
                     <path id="journey-progress-path" d="M 20 0 C 80 33, -40 66, 20 100" fill="none" stroke="#6EADAD" stroke-width="2" stroke-dasharray="100" stroke-dashoffset="100" class="transition-all duration-75 ease-linear"></path>
                 </svg>
@@ -228,7 +218,7 @@
             </div>
         </div>
 
-        <div class="relative w-full md:w-7/12 h-1/2 md:h-full p-6 md:p-12 flex items-center justify-center journey-right-col">
+        <div class="relative w-full md:w-7/12 h-1/2 md:h-full p-6 md:p-12 flex items-center justify-center">
             <div id="split-container" class="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/10] rounded-3xl overflow-hidden cursor-ew-resize select-none" style="border:1px solid #E4EDED; box-shadow: 0 32px 64px rgba(26,46,46,0.10);">
 
                 <div class="split-set absolute inset-0 transition-opacity duration-1000 opacity-100" style="pointer-events: auto;">
@@ -323,8 +313,6 @@
     </div>
 </section>
 
-
-<!-- ═══ PRICING ═══════════════════════════════════════════════ -->
 <section class="pricing" id="pricing">
   <div class="pricing-inner hidden-reveal" id="pricingInner">
     <div class="pricing-header">
@@ -396,7 +384,6 @@
   </div>
 </section>
 
-<!-- ═══ CONTACT ════════════════════════════════════════════════ -->
 <section class="contact" id="contact">
   <div class="contact-inner hidden-reveal" id="contactInner">
     <div class="contact-header">
@@ -492,10 +479,10 @@
           var ctr = document.getElementById('cf-counter');
           if (msg && ctr) msg.addEventListener('input', function () { if (msg.value.length > 500) msg.value = msg.value.slice(0, 500); ctr.textContent = msg.value.length + ' / 500'; });
 
-          // FormSubmit — sends contact-form submissions to your inbox.
-          // Setup: https://formsubmit.co — the very first time someone submits this
-          // form, FormSubmit will email you to confirm the address. Click the link
-          // in that email and from then on, every submission lands in your inbox.
+          
+          
+          
+          
           var FORMSUBMIT_URL = 'https://formsubmit.co/ajax/explorex.ae@gmail.com';
 
           window.handleContact = function (e) {
@@ -510,7 +497,7 @@
             var email     = (document.getElementById('cf-email').value || '').trim();
             var message   = (document.getElementById('cf-msg').value   || '').trim();
 
-            // Basic client-side validation
+            
             if (!firstName || !email || !message) {
               showError('Please fill in your name, email, and message.');
               return false;
@@ -520,10 +507,10 @@
               return false;
             }
 
-            // FormSubmit reads these specially:
-            //   _subject   = subject line of the email you receive
-            //   _template  = "table" gives a clean table layout in your inbox
-            //   _captcha   = "false" disables their reCAPTCHA step
+            
+            
+            
+            
             var payload = {
               name:      firstName + (lastName ? ' ' + lastName : ''),
               email:     email,
@@ -543,7 +530,7 @@
               return r.json().then(function (data) { return { ok: r.ok, data: data }; });
             }).then(function (resp) {
               btn.disabled = false; btnText.textContent = 'Send Message';
-              // FormSubmit responds with { success: "true", message: "..." }
+              
               if (resp.ok && resp.data && (resp.data.success === 'true' || resp.data.success === true)) {
                 document.querySelector('.fancy-form').reset();
                 if (ctr) ctr.textContent = '0 / 500';
@@ -583,7 +570,6 @@
   </div>
 </section>
 
-<!-- ═══ FOOTER ════════════════════════════════════════════════ -->
 <footer>
   <div class="footer-inner">
     <a href="#hero" class="footer-logo" style="text-decoration:none;display:inline-flex;align-items:center;gap:.5rem;">
